@@ -22,9 +22,11 @@ pipeline{
         }
         stage('Build Infrastructure'){
             steps{
-                sh 'cd Infrastructure'
-                sh 'terraform init'
-                sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=333" -var="ftd_pass=$FTD_PASSWORD" -var="region=us-east-2" -var="key_name=ftd_key" -var="tf_cloud_token=$TERRAFORM_ACCESS_TOKEN" -var="tf_cloud_org=edmcnich" -var="tf_cloud_ws=CNS_Infrastructure"'
+                dir("Infrastructure"){
+                    sh 'pwd'
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=333" -var="ftd_pass=$FTD_PASSWORD" -var="region=us-east-2" -var="key_name=ftd_key" -var="tf_cloud_token=$TERRAFORM_ACCESS_TOKEN" -var="tf_cloud_org=edmcnich" -var="tf_cloud_ws=CNS_Infrastructure"'
+                }
             }
         }
     }
