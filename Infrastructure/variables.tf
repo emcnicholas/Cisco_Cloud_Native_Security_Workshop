@@ -1,7 +1,4 @@
 // Variables //
-variable "tf_cloud_token" {}
-variable "tf_cloud_org" {}
-variable "tf_cloud_ws" {}
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
 variable "region" {
