@@ -1,0 +1,36 @@
+#NGFW Initial Configuration File
+
+- hosts: ftd
+  connection: httpapi
+  tasks:
+
+    # The following tasks check the current state of device provisioning, displays the EULA text,
+    # and asks the user to accept it:
+
+    - name: Get provisioning info
+      ftd_configuration:
+        operation: getInitialProvision
+        path_params:
+          objId: default
+        register_as: provisionInfo
+
+    - name: Show EULA text
+      debug:
+        msg: 'EULA details: {{ provisionInfo.eulaText }}'
+
+    - name: Confirm EULA acceptance
+      pause:
+        prompt: Please confirm you want to accept EULA. Press Return to continue. To abort,
+          press Ctrl+C and then "A"
+
+    # This task sends a request to the device to unlock it.
+
+    - name: Complete initial provisioning
+      ftd_configuration:
+        operation: addInitialProvision
+        data:
+          acceptEULA: true
+          eulaText: '{{ provisionInfo.eulaText }}'
+          type: initialprovision
+      vars:
+        ansible_command_timeout: 30
