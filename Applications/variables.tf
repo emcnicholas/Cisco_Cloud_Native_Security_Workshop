@@ -37,8 +37,8 @@ variable "secure_workload_api_url" {
 
 // Secure Cloud Native Access and Secret Key //
 // Uncomment the 2 variables below if deploying Secure Cloud Native
-variable "securecn_access_key" {}
-variable "securecn_secret_key" {}
+//variable "securecn_access_key" {}
+//variable "securecn_secret_key" {}
 
 // Local Variables //
 locals {
