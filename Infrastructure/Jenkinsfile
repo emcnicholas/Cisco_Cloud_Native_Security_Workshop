@@ -19,32 +19,5 @@ pipeline{
                 git branch: 'main', url: 'https://$GITHUB_ACCESS_TOKEN@github.com/emcnicholas/Cisco_Cloud_Native_Security_Part2.git
             }
         }
-//         stage('Terraform init'){
-//             steps{
-//                 sh 'terraform init'
-//             }
-//         }
-//         stage('Terraform apply Infrastructure'){
-//             steps{
-//                 sh 'terraform apply -auto-approve -var="aws_access_key=AKIATA6CL6OWFJ36KW5R" -var="aws_secret_key=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" -var="lab_id=8" -var="ftd_pass=Cisco@123" -var="region=us-east-2" -var="key_name=ftd_key"'
-//             }
-//         }
-//         stage('Ansible Initialize FTD'){
-//             steps{
-//                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-//                     sh 'docker run -v $(pwd)/ansible:/ftd-ansible/playbooks -v $(pwd)/ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_initial_provisioning.yaml'
-//                 }
-//             }
-//         }
-//         stage('Ansible Configure FTD'){
-//             steps{
-//                 sh 'docker run -v $(pwd)/ansible:/ftd-ansible/playbooks -v $(pwd)/ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
-//             }
-//         }
-//         stage('Terraform destroy'){
-//             steps{
-//                 sh 'terraform destroy -auto-approve -var="aws_access_key=AKIATA6CL6OWFJ36KW5R" -var="aws_secret_key=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" -var="lab_id=8" -var="ftd_pass=Cisco@123" -var="region=us-east-2" -var="key_name=ftd_key"'
-//             }
-//         }
     }
 }
