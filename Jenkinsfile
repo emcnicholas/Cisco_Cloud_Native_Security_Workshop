@@ -16,7 +16,7 @@ pipeline{
     stages{
         stage('SCM Checkout'){
             steps{
-                git branch: 'main', url: 'https://${environment.GITHUB_ACCESS_TOKEN}@github.com/emcnicholas/Cisco_Cloud_Native_Security_Part2.git'
+                git branch: 'main', url: 'https://${GITHUB_ACCESS_TOKEN}@github.com/emcnicholas/Cisco_Cloud_Native_Security_Part2.git'
             }
         }
     }
