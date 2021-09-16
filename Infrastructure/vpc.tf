@@ -195,9 +195,6 @@ resource "aws_route" "ext_default_route" {
   route_table_id         = aws_route_table.ftd_outside_route.id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.int_gw.id
-  tags = {
-    Name = "${local.vpc_name} Ext Default Route"
-  }
 }
 
 // Internal Default Route //
@@ -206,9 +203,6 @@ resource "aws_route" "inside_default_route" {
   route_table_id          = aws_route_table.ftd_inside_route.id
   destination_cidr_block  = "0.0.0.0/0"
   network_interface_id    = aws_network_interface.ftd_inside.id
-  tags = {
-    Name = "${local.vpc_name} Int Default Route"
-  }
 }
 
 resource "aws_route_table_association" "outside_association" {
