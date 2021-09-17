@@ -18,7 +18,7 @@ output "eks_cluster_name" {
 }
 
 data "template_file" "jenkinsfile" {
-  template = file("${path.root}../Jenkinsfile")
+  template = file("${path.root}/../Jenkinsfile")
   vars = {
     eks_ip = aws_eip.eks_outside_EIP.public_ip
   }
