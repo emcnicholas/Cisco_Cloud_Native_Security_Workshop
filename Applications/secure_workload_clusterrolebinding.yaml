@@ -43,6 +43,7 @@ metadata:
 roleRef:
   kind: ClusterRole
   name: tetration.read.only
+  apiGroup: rbac.authorization.k8s.io
 subjects:
   -
     kind: ServiceAccount
