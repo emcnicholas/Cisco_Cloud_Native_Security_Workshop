@@ -5,6 +5,7 @@ pipeline{
     environment {
         LAB_NAME               = 'CNS_Lab'
         LAB_ID                 = '333'
+        EKS_IP                 = '${eks_ip}'
         AWS_ACCESS_KEY_ID      = credentials('aws-access-key')
         AWS_SECRET_ACCESS_KEY  = credentials('aws-secret-key')
         AWS_REGION             = 'us-east-2'
@@ -48,6 +49,11 @@ pipeline{
                 dir("Infrastructure"){
                     sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
                 }
+            }
+        }
+        stage('Test Application'){
+            steps{
+                httpRequest ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://$EKS_IP:30001', wrapAsMultipart: false
             }
         }
     }
