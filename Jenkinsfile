@@ -46,7 +46,7 @@ pipeline{
         stage('Deploy Secure Workload'){
             steps{
                 dir("Applications"){
-                    sh 'bash Secure_Workload_K8s_deploy.sh'
+                    sh 'aws eks --region us-east-2 update-kubeconfig --name CNS_Lab_333'
                 }
             }
         }
