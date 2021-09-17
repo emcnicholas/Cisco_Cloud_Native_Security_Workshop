@@ -46,7 +46,7 @@ pipeline{
         stage('Deploy Secure Firewall'){
             steps{
                 dir("Infrastructure"){
-                    sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
+                    sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
                 }
             }
         }
