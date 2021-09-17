@@ -43,12 +43,10 @@ pipeline{
                 }
             }
         }
-        stage('Deploy Secure Workload'){
+        stage('Deploy Secure Firewall'){
             steps{
-                dir("Applications"){
-                    sh 'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"'
-                    sh 'unzip awscliv2.zip'
-                    sh './aws/install'
+                dir("Infrastructure"){
+                    sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
                 }
             }
         }
