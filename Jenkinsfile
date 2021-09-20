@@ -53,7 +53,7 @@ pipeline{
 //         }
         stage('Test Application'){
             steps{
-                httpRequest ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://${EKS_HOST}:30001', wrapAsMultipart: false
+                httpRequest ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://$EKS_HOST:30001', wrapAsMultipart: false
             }
         }
     }
