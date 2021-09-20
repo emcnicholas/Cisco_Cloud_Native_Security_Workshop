@@ -44,13 +44,13 @@ pipeline{
                 }
             }
         }
-        stage('Deploy Secure Firewall'){
-            steps{
-                dir("Infrastructure"){
-                    sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
-                }
-            }
-        }
+//         stage('Deploy Secure Firewall'){
+//             steps{
+//                 dir("Infrastructure"){
+//                     sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
+//                 }
+//             }
+//         }
         stage('Test Application'){
             steps{
                 httpRequest ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://$EKS_IP:30001', wrapAsMultipart: false
