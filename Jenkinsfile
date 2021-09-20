@@ -27,23 +27,23 @@ pipeline{
                 git branch: 'main', url: 'https://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@github.com/emcnicholas/Cisco_Cloud_Native_Security_Part2.git'
             }
         }
-        stage('Build Infrastructure'){
-            steps{
-                dir("Infrastructure"){
-                    sh 'pwd'
-                    sh 'terraform init'
-                    sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$LAB_ID" -var="ftd_pass=$FTD_PASSWORD" -var="region=us-east-2" -var="key_name=ftd_key"'
-                }
-            }
-        }
-        stage('Deploy Secure Cloud Analytics'){
-            steps{
-                dir("Applications"){
-                    sh 'terraform init'
-                    sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=333" -var="region=us-east-2" -var="sca_service_key=$SCA_SERVICE_KEY" -var="secure_workload_api_key=$SW_API_KEY" -var="secure_workload_api_sec=$SW_API_SEC"'
-                }
-            }
-        }
+//         stage('Build Infrastructure'){
+//             steps{
+//                 dir("Infrastructure"){
+//                     sh 'pwd'
+//                     sh 'terraform init'
+//                     sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$LAB_ID" -var="ftd_pass=$FTD_PASSWORD" -var="region=us-east-2" -var="key_name=ftd_key"'
+//                 }
+//             }
+//         }
+//         stage('Deploy Secure Cloud Analytics'){
+//             steps{
+//                 dir("Applications"){
+//                     sh 'terraform init'
+//                     sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=333" -var="region=us-east-2" -var="sca_service_key=$SCA_SERVICE_KEY" -var="secure_workload_api_key=$SW_API_KEY" -var="secure_workload_api_sec=$SW_API_SEC"'
+//                 }
+//             }
+//         }
 //         stage('Deploy Secure Firewall'){
 //             steps{
 //                 dir("Infrastructure"){
@@ -51,9 +51,17 @@ pipeline{
 //                 }
 //             }
 //         }
-        stage('Test Application'){
+//         stage('Test Application'){
+//             steps{
+//                 httpRequest ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://3.18.251.162:30001', wrapAsMultipart: false
+//             }
+//         }
+        stage('Destroy Secure Cloud Analytics'){
             steps{
-                httpRequest ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://3.18.251.162:30001', wrapAsMultipart: false
+                dir("Applications"){
+                    sh 'terraform init'
+                    sh 'terraform destroy -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=333" -var="region=us-east-2" -var="sca_service_key=$SCA_SERVICE_KEY" -var="secure_workload_api_key=$SW_API_KEY" -var="secure_workload_api_sec=$SW_API_SEC"'
+                }
             }
         }
     }
