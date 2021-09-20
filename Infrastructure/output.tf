@@ -17,9 +17,9 @@ output "eks_cluster_name" {
   value = "${var.vpc_name}_${var.lab_id}"
 }
 
-data "template_file" "jenkinsfile" {
-  template = file("${path.root}/../Jenkinsfile")
-  vars = {
-    eks_public_ip = aws_eip.eks_outside_EIP.public_ip
-  }
-}
+//data "template_file" "jenkinsfile" {
+//  template = file("${path.root}/../Jenkinsfile")
+//  vars = {
+//    eks_public_ip = aws_eip.eks_outside_EIP.public_ip
+//  }
+//}
