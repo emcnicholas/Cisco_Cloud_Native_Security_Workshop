@@ -3,7 +3,7 @@
 // AWS Environment
 aws_access_key     = "AKIATA6CL6OWFJ36KW5R"
 aws_secret_key     = "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"
-lab_id             = "99" // Lab ID (1 through 25)
+lab_id             = "Dev" // Lab ID (1 through 25)
 remote_hosts       = ["71.175.93.211/32","64.100.11.232/32","100.11.24.79/32"]
 vpc_name           = "CNS_Lab"
 region             = "us-east-2"
