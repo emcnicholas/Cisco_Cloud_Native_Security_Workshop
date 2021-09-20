@@ -5,7 +5,7 @@ pipeline{
     environment {
         LAB_NAME               = 'CNS_Lab'
         LAB_ID                 = '333'
-        //EKS_IP                 = "${eks_ip}"
+        EKS_IP                 = '3.18.251.162'
         AWS_ACCESS_KEY_ID      = credentials('aws-access-key')
         AWS_SECRET_ACCESS_KEY  = credentials('aws-secret-key')
         AWS_REGION             = 'us-east-2'
@@ -53,7 +53,7 @@ pipeline{
         }
         stage('Test Application'){
             steps{
-                httpRequest ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://${eks_ip}:30001', wrapAsMultipart: false
+                httpRequest ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://$EKS_IP:30001', wrapAsMultipart: false
             }
         }
     }
