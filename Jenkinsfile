@@ -31,14 +31,14 @@ pipeline{
                 git branch: 'main', url: 'https://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@github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
             }
         }
-        stage('Build Infrastructure'){
-            steps{
-                dir("Infrastructure"){
-                    sh 'terraform init'
-                    sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$DEV_LAB_ID" -var="region=$DEV_AWS_REGION" -var="aws_az1=$DEV_AWS_AZ1" -var="aws_az2=$DEV_AWS_AZ2" -var="ftd_pass=$FTD_PASSWORD" -var="key_name=ftd_key"'
-                }
-            }
-        }
+//         stage('Build Infrastructure'){
+//             steps{
+//                 dir("Infrastructure"){
+//                     sh 'terraform init'
+//                     sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$DEV_LAB_ID" -var="region=$DEV_AWS_REGION" -var="aws_az1=$DEV_AWS_AZ1" -var="aws_az2=$DEV_AWS_AZ2" -var="ftd_pass=$FTD_PASSWORD" -var="key_name=ftd_key"'
+//                 }
+//             }
+//         }
 //         stage('Deploy Secure Cloud Analytics'){
 //             steps{
 //                 dir("Applications"){
@@ -59,13 +59,13 @@ pipeline{
 //                 httpRequest ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://3.18.251.162:30001', wrapAsMultipart: false
 //             }
 //         }
-//         stage('Destroy'){
-//             steps{
-//                 dir("Infrastructure"){
-//                     sh 'terraform init'
-//                     sh 'terraform destroy -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$LAB_ID" -var="ftd_pass=$FTD_PASSWORD" -var="region=us-east-2" -var="key_name=ftd_key"'
-//                 }
-//             }
-//         }
+        stage('Destroy'){
+            steps{
+                dir("Infrastructure"){
+                    sh 'terraform init'
+                    sh 'terraform destroy -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$LAB_ID" -var="ftd_pass=$FTD_PASSWORD" -var="region=us-east-2" -var="key_name=ftd_key"-var="region=$DEV_AWS_REGION" -var="aws_az1=$DEV_AWS_AZ1" -var="aws_az2=$DEV_AWS_AZ2"'
+                }
+            }
+        }
     }
 }
