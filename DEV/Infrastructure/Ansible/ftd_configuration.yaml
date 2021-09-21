@@ -1,0 +1,279 @@
+#NGFW Initial Configuration File
+
+- hosts: ftd
+  connection: httpapi
+  vars:
+    iface_name: "inside"
+  tasks:
+    # This task will create the network interfaces
+    - name: Outside Interface
+      ftd_configuration:
+        operation: upsertPhysicalInterface
+        data:
+          name: outside
+          hardwareName: TenGigabitEthernet0/0
+          tenGigabitInterface: True
+          monitorInterface: True
+          ipv4:
+            addressNull: False
+            defaultRouteUsingDHCP: True
+            dhcp: True
+            ipType: DHCP
+            type: interfaceipv4
+          mtu: 1500
+          enabled: True
+          mode: ROUTED
+          type: physicalinterface
+        register_as: "outside_int"
+      register: return
+
+    # Remove default DHCP server from inside interface
+    - name: Get List of DHCP servers
+      ftd_configuration:
+        operation: "getDHCPServerContainerList"
+        register_as: dhcp_containers_list
+    - name: Remove default DHCP server for inside interface
+      ftd_configuration:
+        operation: "editDHCPServerContainer"
+        data:
+          name: "{{ dhcp_containers_list.0.name }}"
+          version: "{{ dhcp_containers_list.0.version }}"
+          autoConfig: "{{ dhcp_containers_list.0.autoConfig }}"
+          primaryDNS: "{{ dhcp_containers_list.0.primaryDNS }}"
+          secondaryDNS: "{{ dhcp_containers_list.0.secondaryDNS }}"
+          primaryWINS: "{{ dhcp_containers_list.0.primaryWINS }}"
+          secondaryWINS: "{{ dhcp_containers_list.0.secondaryWINS }}"
+          servers: '{{ dhcp_containers_list.0.servers | selectattr("interface.name", "ne", iface_name) | list }}'
+          interface: "{{ dhcp_containers_list.0.interface }}"
+          type: "{{ dhcp_containers_list.0.type }}"
+        path_params:
+          objId: "{{ dhcp_containers_list.0.id }}"
+
+    # Inside interface
+    - name: Inside Interface
+      ftd_configuration:
+        operation: upsertPhysicalInterface
+        data:
+          name: inside
+          hardwareName: TenGigabitEthernet0/1
+          tenGigabitInterface: True
+          monitorInterface: True
+          ipv4:
+            addressNull: False
+            defaultRouteUsingDHCP: True
+            dhcp: True
+            ipType: DHCP
+            type: interfaceipv4
+          mtu: 1500
+          enabled: True
+          mode: ROUTED
+          type: physicalinterface
+        register_as: "inside_int"
+      register: return
+
+    # NETWORK OBJECTS
+    - name: K8s Cluster Host
+      ftd_configuration:
+        operation: 'upsertNetworkObject'
+        data:
+          name: "K8s_Cluster"
+          description: "Kubernetes Cluster"
+          subType: "HOST"
+          value: "{{ eks_inside_ip }}"
+          type: "networkobject"
+        register_as: "K8s_Cluster"
+      register: return
+
+    - name: K8s Nat Host
+      ftd_configuration:
+        operation: 'upsertNetworkObject'
+        data:
+          name: "K8s_ext"
+          description: "Kubernetes Cluster Nat address"
+          subType: "HOST"
+          value: "{{ eks_outside_ip }}"
+          type: "networkobject"
+        register_as: "K8s_ext"
+      register: return
+
+    # SERVICE OBJECTS
+    - name: YELB_APP_UI
+      ftd_configuration:
+        operation: 'upsertTCPPortObject'
+        data:
+          name: "yelb_app-ui"
+          description: "yelb app ui service-node port"
+          port: "30001"
+          type: "tcpportobject"
+        register_as: "yelb_app_ui"
+      register: return
+    - name: NGINX
+      ftd_configuration:
+        operation: 'upsertTCPPortObject'
+        data:
+          name: "nginx"
+          description: "nginx app ui service-node port"
+          port: "30201"
+          type: "tcpportobject"
+        register_as: "nginx"
+      register: return
+    - name: Get an IPv4 network
+      ftd_configuration:
+        operation: getNetworkObjectList
+        filters:
+          name: any-ipv4
+        register_as: any_ipv4_object
+
+    # Object NAT
+    - name: Get Object NAT Policy
+      ftd_configuration:
+        operation: getObjectNatRuleContainerList
+        register_as: nat_container_results
+      register: return
+
+    - name: K8S CLUSTER NAT
+      ftd_configuration:
+        operation: "upsertObjectNatRule"
+        data:
+          name: "K8s_Nat"
+          sourceInterface:
+            name: "inside"
+            hardwareName: "TenGigabitEthernet0/1"
+            id: "{{ inside_int.id }}"
+            type: "physicalinterface"
+          destinationInterface:
+            name: "outside"
+            hardwareName: "TenGigabitEthernet0/0"
+            id: "{{ outside_int.id }}"
+            type: "physicalinterface"
+          natType: "STATIC"
+          originalNetwork:
+            name: "K8s_Cluster"
+            id: "{{ K8s_Cluster.id }}"
+            type: "networkobject"
+          translatedNetwork:
+            name: "K8s_Ext"
+            id: "{{ K8s_ext.id }}"
+            type: "networkobject"
+          type: "objectnatrule"
+        path_params:
+          parentId: "{{ nat_container_results[0].id}}"
+
+    # SECURITY ZONES
+    - name: Inside Security Zone
+      ftd_configuration:
+        operation: upsertSecurityZone
+        data:
+          name: inside_zone
+          interfaces:
+            - name: inside
+              hardwareName: TenGigabitEthernet0/1
+              id: "{{ inside_int.id }}"
+              type: physicalinterface
+          mode: ROUTED
+          type: securityzone
+        register_as: inside_zone
+      register: return
+
+    - name: Outside Security Zone
+      ftd_configuration:
+        operation: upsertSecurityZone
+        data:
+          name: outside_zone
+          interfaces:
+            - name: outside
+              hardwareName: TenGigabitEthernet0/0
+              id: "{{ outside_int.id }}"
+              type: physicalinterface
+          mode: ROUTED
+          type: securityzone
+        register_as: outside_zone
+      register: return
+
+    # Access Control Policies
+    - name: K8s_Inbound Access Rule
+      ftd_configuration:
+        operation: upsertAccessRule
+        data:
+          name: K8s_Inbound
+          sourceZones:
+            - name: outside_zone
+              id: "{{ outside_zone.id }}"
+              type: securityzone
+          destinationZones:
+            - name: inside_zone
+              id: "{{ inside_zone.id }}"
+              type: securityzone
+          destinationNetworks:
+            - name: K8s_Cluster
+              id: "{{ K8s_Cluster.id }}"
+              type: networkobject
+            - name: K8s_ext
+              id: "{{ K8s_ext.id }}"
+              type: networkobject
+          sourcePorts: [ ]
+          destinationPorts:
+            - name: yelb_app_ui
+              id: "{{ yelb_app_ui.id }}"
+              type: tcpportobject
+            - name: nginx
+              id: "{{ nginx.id }}"
+              type: tcpportobject
+          ruleAction: PERMIT
+          eventLogAction: LOG_BOTH
+          type: accessrule
+        path_params:
+          parentId: default
+
+    # Default Outbound Access Rules
+    - name: Create an access rule allowing outbound traffic
+      ftd_configuration:
+        operation: upsertAccessRule
+        data:
+          name: Outbound_Access
+          type: accessrule
+          destinationZones:
+            - name: outside_zone
+              id: "{{ outside_zone.id }}"
+              type: securityzone
+          sourceZones:
+            - name: inside_zone
+              id: "{{ inside_zone.id }}"
+              type: securityzone
+          sourceNetworks:
+            - '{{ any_ipv4_object[0] }}'
+          ruleAction: PERMIT
+          eventLogAction: LOG_BOTH
+        path_params:
+          parentId: default
+
+
+    # Deploy Policy
+    - name: Fetch pending changes
+      ftd_configuration:
+        operation: getBaseEntityDiffList
+        register_as: pending_changes
+
+    - name: Complete playbook when nothing to deploy
+      meta: end_play
+      when: pending_changes | length == 0
+
+    - name: Start deployment
+      ftd_configuration:
+        operation: addDeployment
+        register_as: deployment_job
+
+    - name: Poll deployment status until the job is finished
+      ftd_configuration:
+        operation: getDeployment
+        path_params:
+          objId: '{{ deployment_job.id }}'
+        register_as: deployment_status
+      until: deployment_status.endTime != -1
+      retries: 100
+      delay: 3
+
+    - name: Stop the playbook if the deployment failed
+      fail:
+        msg: 'Deployment failed. Status: {{ deployment_status.statusMessages }}'
+      when: deployment_status.state != 'DEPLOYED'
