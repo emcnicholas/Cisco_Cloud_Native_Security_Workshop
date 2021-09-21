@@ -62,7 +62,6 @@ pipeline{
         stage('Destroy'){
             steps{
                 dir("Infrastructure"){
-                    sh 'terraform init'
                     sh 'terraform destroy -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$LAB_ID" -var="ftd_pass=$FTD_PASSWORD" -var="region=us-east-2" -var="key_name=ftd_key"-var="region=$DEV_AWS_REGION" -var="aws_az1=$DEV_AWS_AZ1" -var="aws_az2=$DEV_AWS_AZ2"'
                 }
             }
