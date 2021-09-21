@@ -2,7 +2,7 @@
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
 variable "region" {
-        default = "us-east-2"
+        default = "us-east-1"
 }
 variable "FTD_version" {
     default = "ftdv-6.7.0"
@@ -17,10 +17,10 @@ variable "vpc_name" {
 }
 //AWS Availability Zones
 variable "aws_az1" {
-    default = "us-east-2a"
+    default = "us-east-1a"
 }
 variable "aws_az2" {
-    default = "us-east-2b"
+    default = "us-east-1b"
 }
 variable "vpc_cidr" {
     default = "10.0.0.0/16"

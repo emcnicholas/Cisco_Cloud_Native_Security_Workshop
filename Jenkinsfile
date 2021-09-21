@@ -54,15 +54,15 @@ pipeline{
 //                 //httpRequest ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://18.189.9.156:30001', wrapAsMultipart: false
 //             }
 //         }
-//         stage('Deploy PROD Infrastructure'){
-//             steps{
-//                 dir("Infrastructure"){
-//                     sh 'terraform init'
-//                     sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$PROD_LAB_ID" -var="region=$PROD_AWS_REGION" -var="aws_az1=$PROD_AWS_AZ1" -var="aws_az2=$PROD_AWS_AZ2" -var="ftd_pass=$FTD_PASSWORD" -var="key_name=ftd_key"'
-//                     //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
-//                 }
-//             }
-//         }
+        stage('Deploy PROD Infrastructure'){
+            steps{
+                dir("PROD/Infrastructure"){
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$PROD_LAB_ID" -var="region=$PROD_AWS_REGION" -var="aws_az1=$PROD_AWS_AZ1" -var="aws_az2=$PROD_AWS_AZ2" -var="ftd_pass=$FTD_PASSWORD" -var="key_name=ftd_key"'
+                    //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
+                }
+            }
+        }
 //         stage('Destroy'){
 //             steps{
 //                 dir("Infrastructure"){
