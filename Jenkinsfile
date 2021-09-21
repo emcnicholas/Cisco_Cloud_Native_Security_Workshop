@@ -40,7 +40,7 @@ pipeline{
                 }
             }
         }
-        stage('Deploy DEV Cisco Secure Cloud Native Security'){
+        stage('Build DEV Cisco Secure Cloud Native Security'){
             steps{
                 dir("Applications"){
                     sh 'terraform init'
@@ -54,7 +54,7 @@ pipeline{
                 //httpRequest ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://18.189.9.156:30001', wrapAsMultipart: false
             }
         }
-        stage('Build PROD Infrastructure'){
+        stage('Deploy PROD Infrastructure'){
             steps{
                 dir("Infrastructure"){
                     sh 'terraform init'
