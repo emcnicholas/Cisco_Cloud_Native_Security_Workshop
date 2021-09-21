@@ -2,7 +2,7 @@
 
 // AWS Environment
 aws_access_key     = ""
-aws_secret_key     = "/hpHhjLzSC"
+aws_secret_key     = ""
 lab_id             = "" // Lab ID (1 through 25)
 remote_hosts       = ["71.175.93.211/32","64.100.11.232/32","100.11.24.79/32"]
 vpc_name           = ""

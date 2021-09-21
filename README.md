@@ -28,12 +28,12 @@ All other solutions, such as Cisco Secure Cloud Analytic, Secure Workload, and S
 ## Instructions
 
 ### Set up the Terraform project
-1. First thing to do is to setup a project on your local environment. From your IDE or the CLI create a project directory to work in.
-You can name the directory whatever you would like. Clone [This Repository](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1.git)
+1. First thing to do is to set up a project on your local environment. From your IDE or the CLI create a project directory to work in.
+You can name the directory whatever you would like. Clone the [This Repository](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git)
 to your project directory and move into the /Cisco_Cloud_Native_Security_Part1 directory. Take a look inside the directory. 
 
-        Cisco_Cloud_Native_Security_Part1 % ls 
-        Ansible         Kubernetes      LICENSE         README.md       Solutions       Terrafor
+        Cisco_Cloud_Native_Security % ls 
+        DEV             Jenkinsfile     LICENSE         PROD            README.md       images
 
 2. Let's start in the **Terraform** directory. We need to create a few global variables in our project. Terraform uses a
 *variable definitions file* to set these global variables. The file must be named `terraform.tfvars` or any name ending in `.auto.tfvars`.
