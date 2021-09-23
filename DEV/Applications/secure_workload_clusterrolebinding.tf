@@ -64,3 +64,6 @@ data "kubernetes_secret" "tetration_read_only" {
     name = data.kubernetes_service_account.tetration_read_only.default_secret_name
   }
 }
+output "tetration_read_only_secret_name" {
+  value = data.kubernetes_secret.tetration_read_only
+}
