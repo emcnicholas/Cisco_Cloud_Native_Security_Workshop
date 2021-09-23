@@ -31,23 +31,23 @@ pipeline{
                 git branch: 'main', url: 'https://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@github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
             }
         }
-        stage('Build DEV Infrastructure'){
-            steps{
-                dir("DEV/Infrastructure"){
-                    sh 'terraform init'
-                    sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$DEV_LAB_ID" -var="region=$DEV_AWS_REGION" -var="aws_az1=$DEV_AWS_AZ1" -var="aws_az2=$DEV_AWS_AZ2" -var="ftd_pass=$FTD_PASSWORD" -var="key_name=ftd_key"'
-                    //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
-                }
-            }
-        }
-        stage('Build DEV Cisco Secure Cloud Native Security'){
-            steps{
-                dir("DEV/Applications"){
-                    sh 'terraform init'
-                    sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$DEV_LAB_ID" -var="region=$DEV_AWS_REGION" -var="aws_az1=$DEV_AWS_AZ1" -var="aws_az2=$DEV_AWS_AZ2" -var="sca_service_key=$SCA_SERVICE_KEY" -var="secure_workload_api_key=$SW_API_KEY" -var="secure_workload_api_sec=$SW_API_SEC"'
-                }
-            }
-        }
+//         stage('Build DEV Infrastructure'){
+//             steps{
+//                 dir("DEV/Infrastructure"){
+//                     sh 'terraform init'
+//                     sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$DEV_LAB_ID" -var="region=$DEV_AWS_REGION" -var="aws_az1=$DEV_AWS_AZ1" -var="aws_az2=$DEV_AWS_AZ2" -var="ftd_pass=$FTD_PASSWORD" -var="key_name=ftd_key"'
+//                     //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
+//                 }
+//             }
+//         }
+//         stage('Build DEV Cisco Secure Cloud Native Security'){
+//             steps{
+//                 dir("DEV/Applications"){
+//                     sh 'terraform init'
+//                     sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$DEV_LAB_ID" -var="region=$DEV_AWS_REGION" -var="aws_az1=$DEV_AWS_AZ1" -var="aws_az2=$DEV_AWS_AZ2" -var="sca_service_key=$SCA_SERVICE_KEY" -var="secure_workload_api_key=$SW_API_KEY" -var="secure_workload_api_sec=$SW_API_SEC"'
+//                 }
+//             }
+//         }
 //         stage('Test DEV Application'){
 //             steps{
 //                 httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://18.217.103.244:30001', validResponseCodes: '200', wrapAsMultipart: false
@@ -77,15 +77,15 @@ pipeline{
 //         }
 
         // Destroy Infrastructure
-//         stage('Destroy DEV Cisco Secure Cloud Native Security'){
-//             steps{
-//                 dir("DEV/Applications"){
-//                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-//                         sh 'terraform destroy -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$DEV_LAB_ID" -var="region=$DEV_AWS_REGION" -var="aws_az1=$DEV_AWS_AZ1" -var="aws_az2=$DEV_AWS_AZ2" -var="sca_service_key=$SCA_SERVICE_KEY" -var="secure_workload_api_key=$SW_API_KEY" -var="secure_workload_api_sec=$SW_API_SEC"'
-//                     }
-//                 }
-//             }
-//         }
+        stage('Destroy DEV Cisco Secure Cloud Native Security'){
+            steps{
+                dir("DEV/Applications"){
+                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                        sh 'terraform destroy -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$DEV_LAB_ID" -var="region=$DEV_AWS_REGION" -var="aws_az1=$DEV_AWS_AZ1" -var="aws_az2=$DEV_AWS_AZ2" -var="sca_service_key=$SCA_SERVICE_KEY" -var="secure_workload_api_key=$SW_API_KEY" -var="secure_workload_api_sec=$SW_API_SEC"'
+                    }
+                }
+            }
+        }
 //         stage('Destroy PROD Cisco Secure Cloud Native Security'){
 //             steps{
 //                 dir("PROD/Applications"){
@@ -95,13 +95,13 @@ pipeline{
 //                 }
 //             }
 //         }
-//         stage('Destroy DEV Infrastructure'){
-//             steps{
-//                 dir("DEV/Infrastructure"){
-//                     sh 'terraform destroy -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$DEV_LAB_ID" -var="region=$DEV_AWS_REGION" -var="aws_az1=$DEV_AWS_AZ1" -var="aws_az2=$DEV_AWS_AZ2" -var="ftd_pass=$FTD_PASSWORD" -var="key_name=ftd_key"'
-//                 }
-//             }
-//         }
+        stage('Destroy DEV Infrastructure'){
+            steps{
+                dir("DEV/Infrastructure"){
+                    sh 'terraform destroy -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$DEV_LAB_ID" -var="region=$DEV_AWS_REGION" -var="aws_az1=$DEV_AWS_AZ1" -var="aws_az2=$DEV_AWS_AZ2" -var="ftd_pass=$FTD_PASSWORD" -var="key_name=ftd_key"'
+                }
+            }
+        }
 //         stage('Destroy PROD Infrastructure'){
 //             steps{
 //                 dir("PROD/Infrastructure"){
