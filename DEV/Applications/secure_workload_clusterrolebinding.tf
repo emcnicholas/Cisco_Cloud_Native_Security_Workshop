@@ -54,3 +54,13 @@ subjects:
     namespace: default
 YAML
 }
+data "kubernetes_service_account" "tetration_read_only" {
+  metadata {
+    name = "tetration.read.only"
+  }
+}
+data "kubernetes_secret" "tetration_read_only" {
+  metadata {
+    name = data.kubernetes_service_account.tetration_read_only.default_secret_name
+  }
+}
