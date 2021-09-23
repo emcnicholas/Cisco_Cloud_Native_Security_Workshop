@@ -66,4 +66,5 @@ data "kubernetes_secret" "tetration_read_only" {
 }
 output "tetration_read_only_secret_name" {
   value = data.kubernetes_secret.tetration_read_only
+  sensitive = true
 }
