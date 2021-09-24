@@ -1,0 +1,50 @@
+// Providers //
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+    kubernetes = {
+      source = "hashicorp/kubernetes"
+      version = "2.4.1"
+    }
+    kubectl = {
+      source = "gavinbunney/kubectl"
+      version = "1.11.3"
+    }
+  }
+}
+provider "aws" {
+    access_key = var.aws_access_key
+    secret_key = var.aws_secret_key
+    region     =  var.region
+}
+// Kubernetes Configuration
+data "aws_eks_cluster" "eks_cluster" {
+  depends_on = [aws_eks_cluster.eks_cluster]
+  name = "CNS_Lab_${var.lab_id}"
+}
+
+data "aws_eks_cluster_auth" "eks_cluster_auth" {
+  depends_on = [aws_eks_cluster.eks_cluster]
+  name = "CNS_Lab_${var.lab_id}"
+}
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.eks_cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks_cluster.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.eks_cluster_auth.token
+  //load_config_file       = false
+}
+//provider "kubernetes" {
+//  config_path = "~/.kube/config"
+//}
+
+provider "kubectl" {
+  host = data.aws_eks_cluster.eks_cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks_cluster.certificate_authority[0].data)
+  token = data.aws_eks_cluster_auth.eks_cluster_auth.token
+  load_config_file       = false
+}

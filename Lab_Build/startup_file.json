@@ -1,0 +1,5 @@
+{
+	"AdminPassword": "${ftd_pass}",
+	"Hostname": "FTD-${lab_id}",
+	"ManageLocally": "Yes"
+}

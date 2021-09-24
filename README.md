@@ -26,92 +26,111 @@ All other solutions, such as Cisco Secure Cloud Analytic, Secure Workload, and S
 * **(Optional) Cisco Secure Workload Account**
 * **(optional) Cisco Secure CN Account**
 
+## Part 1
+
 ## Instructions
 
 ### Set up the Terraform project
 1. First thing to do is to set up a project on your local environment. From your IDE or the CLI create a project directory to work in.
 You can name the directory whatever you would like. Clone
    [This Repository](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git)
-to your project directory and move into the /Cisco_Cloud_Native_Security_Workshop directory. Take a look inside the directory. 
+to your project directory and move into the /Cisco_Cloud_Native_Security_Workshop directory. Take a look inside the directory.
+   
+   ```
+   [devbox] $ git clone https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git
+   Cloning into 'Cisco_Cloud_Native_Security_Workshop'...
+   remote: Enumerating objects: 373, done.
+   remote: Counting objects: 100% (373/373), done.
+   remote: Compressing objects: 100% (264/264), done.
+   remote: Total 373 (delta 191), reused 288 (delta 106), pack-reused 0
+   Receiving objects: 100% (373/373), 26.65 MiB | 18.84 MiB/s, done.
+   Resolving deltas: 100% (191/191), done.
+   [devbox Cisco_Cloud_Native_Security_Workshop]$ ls
+   DEV  images  Jenkinsfile  Lab_Build  LICENSE  PROD  README.md
+   ```
 
-        Cisco_Cloud_Native_Security % ls 
-        DEV             Jenkinsfile     LICENSE         PROD            README.md       images
 
-2. Let's start in the **Terraform** directory. We need to create a few global variables in our project. Terraform uses a
-*variable definitions file* to set these global variables. The file must be named `terraform.tfvars` or any name ending in `.auto.tfvars`.
-In this case we created a file called `terraform.tfvars`. Let's take a look at the 
-   [terraform.tfvars](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Terraform/terraform.tfvars)
-   file:
-
-   ```   
+2. We will be building out this environment in the **Lab_Build** directory. If you take a look into the directory  
+   We need to create a few global variables in our project. Terraform uses a *variable definitions file* to 
+   set these global variables. The file must be named `terraform.tfvars` or any name ending in `.auto.tfvars`. In this 
+   case we created a file called `terraform.tfvars`. Let's take a look at the file:
+   
+   ```
    // Global Variables
    
    // AWS Environment
-   aws_access_key     = "<aws access key>"
-   aws_secret_key     = "<aws secret key>"
-   vpc_name           = "CNS_Lab"
-   region             = "us-east-2"
-   aws_az1            = "us-east-2a"
-   aws_az1            = "us-east-2b"
-   lab_id             = "1" // Lab ID (1 through 25)
-   remote_hosts       = ["172.16.1.1/32","192.168.2.2/32"] //this is a list, seperate multiple hosts with commas   
+   aws_access_key     = ""
+   aws_secret_key     = ""
+   lab_id             = "" // Lab ID (can be anything, but needs to be unique
+   remote_hosts       = ["10.10.10.10", "172.16.12.12"] //Remote hosts that will have access to environment
+   region             = ""
+   aws_az1            = ""
+   aws_az2            = ""
+   
    // FTD Variables
    FTD_version        = "ftdv-6.7.0" //Allowed Values = ftdv-6.7.0, ftdv-6.6.0,
    ftd_user           = "admin"
-   ftd_pass           = "<password>"
-   key_name           = "<ssh key>"   
-   ```   
+   ftd_pass           = ""
+   key_name           = "" //SSH key created in AWS Region
+   ```
+
    These variables are defined globally, so they will be passed to any variables declared in any other terraform files in this
-   project. Here we configure the 
+   project. These variables must be assigned. Here we configure the 
    * `aws_access_key` and `aws_secret_key` to authenticate to the AWS API 
-   * `vpc_name` which creates a name for the VPC as well as appends the name to any tags we give to resources in the project
+   * AWS Availability zones `aws_az1` and `aws_az2`
    * VPC `region` and availability zone (`aws_az1` and `aws_az2`)
-   * `lab_id` which is appended to the end of the `vpc_name`
+   * `lab_id` which is appended to the end of all the resources that will be created
    * `remote_hosts` which is used to permit access inbound to the FTD mgmt interface and EKS API (Add you public IP address here)
    * `FTD_version` is the version of FTDv we use from the AWS Marketplace
    * `ftd_user` and `ftd_pass` is the username and password we configure on the FTD instance
-   * `key_name` is the ssh key created on AWS to access EC2 instances. This must be created previous to running terraform ([Create SSH Key Pairs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html)).
+   * `key_name` is the ssh key created on AWS to access EC2 instances. This must be created previous to running terraform 
+     ([Create SSH Key Pairs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html)).
 
-3. Next we created a variables file to use in our terraform module. If you are asking "didn't we just create a variables
+3. Next we create a variables file to use in our terraform module. If you are asking "didn't we just create a variables
    file", we did but at a global level. Now we need to configure the variables at the module level. A module is a 
    container for multiple resources that are used together. Modules can be used to create lightweight abstractions, 
    so that you can describe your infrastructure in terms of its architecture, rather than directly in terms of physical 
-   objects. The .tf files in your working directory when you run terraform plan or terraform apply together form the 
+   objects. The `.tf` files in your working directory when you run terraform plan or terraform apply together form the 
    root module. That module may call other modules and connect them together by passing output values from one to input 
    values of another.
-   The top directory, in this case `/terraform` is assigned to the **Root** module. We can create multiple directories 
+   The top directory, in this case `Lab_Build` is assigned to the **Root** module. We can create multiple directories 
    under the root module that would be defined as **Nested Modules**. In part 1 we will only be using the **Root**
    module to develop our IaC, but in part 2 we will use **Nested Modules** to partition our code.
-   In the `/terraform` directory we have a file named `variables.tf` which will define all the variables used in the 
+   Open the [variables.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Infrastructure/blob/main/variables.tf).
+   **Copy and paste it into `Lab_Build` directory.** The `variables.tf` file will define all the variables used in the 
    **Root** module. Like I said above, the `terraform.tfvars` file sets global variables for all modules, but this
    `variables.tf` file sets variables just for the root module. The cool thing about the variables set in this file is 
    that we can now set defaults. What this allows us to do is only set variables in the `terraform.tfvars` files that
    we need to change for our environment and leave all the other variables in the `variables.tf` file as default.
-   Let's take a look at the [variables.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Terraform/variables.tf) 
-   file.
+   
    ```
-   //Subnet and IP addresses
-   variable "outside_subnet" {
-       default = "10.0.0.0/24"
+   // Variables //
+   variable "aws_access_key" {
+     description = "AWS Access Key"
    }
-   variable "ftd_outside_ip_list" {
-       type = list(string)
-       default = ["10.0.0.10","10.0.0.11"]
+   variable "aws_secret_key" {
+     description = "AWS Secret Key"
    }
-   variable "ftd_outside_ip" {
-       default = "10.0.0.10"
+   variable "region" {
+     description = "AWS Region ex: us-east-1"
    }
-   variable "eks_outside_ip" {
-       default = "10.0.0.11"
+   variable "FTD_version" {
+     description = "Secure Firewall Version"
+     default = "ftdv-6.7.0"
    }
-   variable "inside_subnet" {
-       default = "10.0.1.0/24"
+   variable "ftd_user" {
+     description = "Secure Firewall Username"
+     default = "admin"
    }
-   variable "ftd_inside_ip" {
-       default = "10.0.1.10"
+   variable "ftd_pass" {
+     description = "Secure Firewall Password"
    }
-   ...
+   variable "lab_id" {
+     description = "ID associated with this lab instance"
+   }
+   ...data omitted
    ```
+
    In the `variables.tf` file we have a bunch of additional variables that are defined for the VPC such as subnets, 
    network addresses, eks cluster info, and a lot more. If you noticed, some variables have defaults assigned and some 
    don't. We can assign any of these variables in the `terraform.tfvars` and it will take precedence over the defaults. 
@@ -133,17 +152,42 @@ In the following steps we configure code to deploy a VPC, EKS Cluster, and FTDv 
    within Terraform a configuration.
    
    We can add these providers to any of our terraform files, but in our case we added them to the `main.tf`
-   file. Let's take a look at the [main.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Terraform/main.tf) 
-   file:
-   ```   
-   // Providers //
-   provider "aws" {
-   access_key = var.aws_access_key
-   secret_key = var.aws_secret_key
-   region     =  var.region
-   }
-   ...
+   file. Open the 
+   [main.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Infrastructure/blob/main/main.tf) file. 
+   **Copy and paste it into `Lab_Build` directory.**
+
    ```
+   // Providers //
+   
+   terraform {
+     required_providers {
+       aws = {
+         source  = "hashicorp/aws"
+         version = "~> 3.0"
+       }
+       kubernetes = {
+         source = "hashicorp/kubernetes"
+         version = "2.4.1"
+       }
+       kubectl = {
+         source = "gavinbunney/kubectl"
+         version = "1.11.3"
+       }
+     }
+   }
+   provider "aws" {
+       access_key = var.aws_access_key
+       secret_key = var.aws_secret_key
+       region     =  var.region
+   }
+   // Kubernetes Configuration
+   data "aws_eks_cluster" "eks_cluster" {
+     depends_on = [aws_eks_cluster.eks_cluster]
+     name = "CNS_Lab_${var.lab_id}"
+   }
+   ...data omitted
+   ```
+
    We will discuss the additional providers later in this document, but for now let's go over the AWS provider. This
    provider will download all the resources we need to configure zones, CIDRs, subnets, addresses, VPCs, Internet
    Gateways, EKS Clusters, EC2 instance, etc.... All we need to provide is the `access_key`, `secret_key` and `region`.
@@ -152,7 +196,7 @@ In the following steps we configure code to deploy a VPC, EKS Cluster, and FTDv 
    
 2. Now that we have the AWS provider we can configure AWS resources. We created a file named `vpc.tf` just for the VPC
    configuration. We could stick all of our resources in one file, such as `main.tf`, but this becomes hard to manage 
-   once our configuration grows to thousands of line. So we segment our code into smaller manageable files. The `vpc.tf`
+   once our configuration grows to thousands of lines. So we segment our code into smaller manageable files. The `vpc.tf`
    has a lot of configuration, such as: 
    * VPC configuration
    * Subnets
@@ -162,8 +206,9 @@ In the following steps we configure code to deploy a VPC, EKS Cluster, and FTDv 
    * Routes
    * Elastic IP address (public IP addresses)
    
-   All these resources deploy the AWS network infrastructure. Let's take a look at the 
-   [vpc.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Terraform/vpc.tf) file.
+   All these resources deploy the AWS network infrastructure. Open file  
+   [vpc.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Infrastructure/blob/main/vpc.tf) file. 
+   **Copy and paste it into `Lab_Build` directory.**
 
    
 3. Now that there is a network, next we create a file for the Cisco Secure Firewall (FTDv) instance called `ftdv.tf`. 

@@ -1,0 +1,15 @@
+- hosts: ftd
+  connection: local
+  tasks:
+    - name: Pause play until the FTD mgmt interface is reachable from this host
+      uri:
+        url: "https://{{ ansible_host }}"
+        follow_redirects: none
+        method: GET
+        validate_certs: false
+      register: _result
+      until: _result.status == 200
+      retries: 120 # 120 * 10 seconds = 20 minutes
+      delay: 10 # Every 5 seconds
+    - debug:
+        var: _result
