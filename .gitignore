@@ -26,3 +26,4 @@ override.tf.json
 # !example_override.tf
 Infrastructure/.terraform.lock.hcl
 .terraform.lock.hcl
+Lab_Build/tfplan
