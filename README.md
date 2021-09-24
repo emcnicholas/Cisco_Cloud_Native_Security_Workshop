@@ -6,30 +6,32 @@ In part 1 of this 2 part series we will develop our Infrastructure as Code (IoC)
 We will build out and deploy the Terraform and Ansible code to instantiate an AWS Virtual Private Cloud (VPC),
 Elastic Kubernetes Service (EKS) cluster, and a Cisco Secure Firewall instance. We will then deploy Cisco Secure Cloud Analytics,
 Secure Workload, and Secure CN to provide security monitoring, policy, and controls to the cloud native environment.
-In part 2 of series, we will take what we learned here in part 1 and integrate the code into a continuous delivery pipeline
+In part 2 of series, we will take what we learned in part 1 and integrate the code into a continuous delivery pipeline
 using Jenkins and Github.
 
 ## Prerequisites
 The following software is mandatory to run this code successfully. Cisco Secure Firewall will be deployed using an eval license on AWS.
-All other solutions, such as Cisco Secure Cloud Analytic, Secure Workload, and Secure CN are optional.
-* Terraform >= v1.0t (https://www.terraform.io/downloads.html)
-* Ansible >= 2.9 (https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
-* AWS Environment (Need admin access to API, IAM, VPC, EC2, EKS)
-* AWS CLI >= 2.1.# (https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
-* Git   
-* Github Account (https://github.com/join)
-* Kubernetes command-line tool (kubectl) >= 1.21 https://kubernetes.io/docs/tasks/tools/
-* Docker >= 20.10.# (https://docs.docker.com/get-docker/)
-* (Optional) Integrated Development Environment (IDE)  
-* (Optional) Cisco Secure Cloud Analytics Account (https://www.cisco.com/c/en/us/products/security/stealthwatch/stealthwatch-cloud-free-offer.html)
-* (Optional) Cisco Secure Workload Account
-* (optional) Cisco Secure CN Account
+All other solutions, such as Cisco Secure Cloud Analytic, Secure Workload, and Secure CN are **Optional**.
+* **Terraform** >= v1.0t (https://www.terraform.io/downloads.html)
+* **Ansible** >= 2.9 (https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+* **AWS Environment** (Need admin access to API, IAM, VPC, EC2, EKS)
+* **AWS CLI** >= 2.1.# (https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
+* **Git** >= 2.# (https://git-scm.com/downloads)
+* **Github Account** (https://github.com/join)
+* **Kubernetes command-line tool (kubectl)** >= 1.21 https://kubernetes.io/docs/tasks/tools/
+* **Docker** >= 20.10.# (https://docs.docker.com/get-docker/)
+* **(Optional) Jenkins**  (https://www.jenkins.io/doc/book/installing/)
+* **(Optional) Integrated Development Environment** (IDE)  
+* **(Optional) Cisco Secure Cloud Analytics Account** (https://www.cisco.com/c/en/us/products/security/stealthwatch/stealthwatch-cloud-free-offer.html)
+* **(Optional) Cisco Secure Workload Account**
+* **(optional) Cisco Secure CN Account**
 
 ## Instructions
 
 ### Set up the Terraform project
 1. First thing to do is to set up a project on your local environment. From your IDE or the CLI create a project directory to work in.
-You can name the directory whatever you would like. Clone the [This Repository](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git)
+You can name the directory whatever you would like. Clone
+   [This Repository](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git)
 to your project directory and move into the /Cisco_Cloud_Native_Security_Part1 directory. Take a look inside the directory. 
 
         Cisco_Cloud_Native_Security % ls 
