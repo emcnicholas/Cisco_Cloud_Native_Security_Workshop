@@ -32,7 +32,7 @@ All other solutions, such as Cisco Secure Cloud Analytic, Secure Workload, and S
 1. First thing to do is to set up a project on your local environment. From your IDE or the CLI create a project directory to work in.
 You can name the directory whatever you would like. Clone
    [This Repository](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git)
-to your project directory and move into the /Cisco_Cloud_Native_Security_Part1 directory. Take a look inside the directory. 
+to your project directory and move into the /Cisco_Cloud_Native_Security_Workshop directory. Take a look inside the directory. 
 
         Cisco_Cloud_Native_Security % ls 
         DEV             Jenkinsfile     LICENSE         PROD            README.md       images
