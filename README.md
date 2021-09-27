@@ -1031,7 +1031,7 @@ guess what, it supports integration directly with the kubernetes cluster.
    ```
    
 5. Find the file named `secure_cloud_analytics` and change it to `secure_cloud_analytics.tf` so terraform can read it.
-   Click [secure_cloud_analytics](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Terraform/secure_cloud_analytics)
+   Click [secure_cloud_analytics](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/secure_cloud_analytics)
    to view the file.
    
 6. Run `terraform plan -out tfplan` and review the resource that will be created. Run `terraform apply "tfplan"` to 
@@ -1088,9 +1088,162 @@ guess what, it supports integration directly with the kubernetes cluster.
    
    Click on one of the devices to start drilling down into Alerts, Observations, and Session traffic.
 
-### Deploy Cisco Secure Workload
+Well that was super easy. Now we have full visibility into our kubernetes environment. All the flows going in and out of
+the cluster, and between the applications and pods will be inspected using behavioral modeling, including malware 
+and insider threats, continuously monitoring and improving response times with automatic, high-fidelity alerts that make 
+your security team more efficient.
 
-Blah blah blah blah
+### Deploy Cisco Secure Workload
+**(OPTIONAL)**
+
+:warning: **You will need a Cisco Secure Workload account and a Linux host to complete this section**.
+
+This section will show how to deploy **Cisco Secure Workload** to this Cloud Native environment.
+The 
+[Cisco Secure Workload](This section will show how to deploy Cisco Secure Cloud Analytics to this Cloud Native environment.) 
+platform is designed to address this challenge in a comprehensive and 
+scalable way. Secure Workload enables holistic workload protection for multicloud data centers by using:
+* Micro-segmentation, allowing operators to control network communication within the data center, enabling a zero-trust 
+   model
+
+* Behavior baselining, analysis, and identification of deviations for processes running on servers
+
+* Detection of common vulnerabilities and exposures associated with the software packages installed on servers
+
+* The ability to act proactively, such as quarantining server(s) when vulnerabilities are detected and blocking 
+   communication when policy violations are detected
+
+By using this multidimensional workload-protection approach, Cisco Secure Workload significantly reduces the attack 
+surface, minimizes lateral movement in case of security incidents, and more quickly identifies Indicators Of Compromise.
+
+1. To get Secure Workload working in our cloud native environment we need to do three things. First we need an API key
+   and secret. Log into the Secure Workload dashboard and in the upper right hand corner click on the **Profile** icon
+   then **API Keys**. 
+   
+   ![Secure Workload Profile](/images/sw-dash.png)
+   
+   Select **Create API Key**. Give the API key a description and check all the options below. Click **Create**.
+
+   ![Secure Workload API Key](/images/sw-create-api2.png)
+
+   This will show you the API Key and Secret Key. You can download it to a safe place or copy the keys directly from the
+   screen. 
+   
+   ![Secure Workload API](/images/sw-api.png)
+
+2. The second thing we need is an agent. Secure Workload has always supported a wide variety of operating systems to 
+   deploy sofware agents to, but Kubernetes is a little different. We could manually deploy an agent to every worker 
+   node in our cluster, but that isn't very agile and doesn't give us the ability to create segmentation policy at the
+   container/pod layer. To do this we need to deploy a 
+   [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/), just like we did for Secure 
+   Cloud Analytics. A Daemonset will deploy a Secure Workload agent to every kubernetes worker node scheduled in the 
+   cluster. This means that if a new node is added to the cluster, it will come with the agent installed automatically.
+   To install the Daemonset we need to download and run the install script. 
+   
+   :warning: The Cisco Secure Workload Kubernetes Installer is only supported to be run on a Linux Operating system.
+   This will not work correctly on Windows or Mac operating systems. The Linux machine will also need AWS CLI and the
+   Kubernetes agent installed!
+   
+   From the Secure Workload dashboard go to **Manage** then **Agents** on the left menu bar.
+
+   ![Secure Workload Agents](/images/sw-agents.png)
+
+   Select **Installer** to go through the Software Agent Installer workflow. Click **Next**.
+
+   ![Secure Workload Installer](/images/sw-installer.png)
+
+   Select **Kubernetes** as the platform to be installed on and **YES/NO** if your Kubernetes environment is going 
+   through a proxy (add proxy info if it does). Click **Download Installer** to download the install script. Save the
+   install script to a directly on your Linux machine. 
+   
+   ![Secure Workload Agent Download](/images/sw-agent-download.png)
+
+   Make sure that AWS CLI and Kubectl are installed on your Linux host. Also make sure your kube config file is updated
+   to use the right context (`aws eks --region <aws-region> update-kubeconfig --name <cluster-name>`).
+   
+   ```
+   [devbox Lab_Build]$ aws eks --region us-east-2 update-kubeconfig --name CNS_Lab_Test
+   Added new context arn:aws:eks:us-east-2:208176673708:cluster/CNS_Lab_Test to /home/centos/.kube/config
+   ```
+   
+   Run the install script with --pre-check flag first.
+
+   ```
+   bash tetration_daemonset_installer.sh --pre-check
+   ```
+   
+   If everything is good run the installer.
+
+   ```
+   [devbox Lab_Build]$ bash ~/Downloads/tetration_installer_edmcnich_enforcer_kubernetes_tet-pov-rtp1.sh
+   -------------------------------------------------------------
+   Starting Tetration Analytics Installer for Kubernetes install
+   -------------------------------------------------------------
+   Location of Kubernetes credentials file is /home/centos/.kube/config
+   The following Helm Chart will be installed
+   apiVersion: v2
+   appVersion: 3.6.0-17-enforcer
+   description: Tetration Enforcer Agent
+   name: tetration-agent
+   type: application
+   version: 3.6.0-17-enforcer
+   Release "tetration-agent" does not exist. Installing it now.
+   NAME: tetration-agent
+   LAST DEPLOYED: Mon Sep 27 14:10:24 2021
+   NAMESPACE: tetration
+   STATUS: deployed
+   REVISION: 1
+   TEST SUITE: None
+   NOTES:
+   The Tetration Enforcement Agent has been deployed to your Kubernetes cluster.
+   
+   1. You can view your Helm Chart details again using
+   
+     helm get all -n tetration tetration-agent
+   
+   2. You can view the Daemonset created using
+   
+     kubectl get ds -n tetration
+   
+   3. You can view the Daemonset pods created for Tetration Agents using
+   
+      kubectl get pod -n tetration
+      
+   --------------------------------------------------------------------------
+   
+   You can also check on the Tetration Agent UI page for these agents.
+   Deployment of daemonset complete
+   ```
+
+   Check to make sure the daemonset has been deployed.
+
+   ```
+   [devbox Lab_Build]$ kubectl get ns tetration
+   NAME        STATUS   AGE
+   tetration   Active   5m25s
+   [devbox Lab_Build]$ kubectl get ds -n tetration
+   NAME              DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+   tetration-agent   1         1         1       1            1           <none>          5m41s
+   [devbox Lab_Build]$ kubectl get pods -n tetration
+   NAME                    READY   STATUS    RESTARTS   AGE
+   tetration-agent-4kbrd   1/1     Running   0          5m56s
+   ```
+   
+   Check the Secure Workload dashboard. Go to **Manage** then **Agents** and Select **Agent List**. The agent should be
+   there with the hostname of your EKS worker node.
+   
+   ![Secure Workload Agent List](/images/sw-agent-installed.png)
+
+3. Finally, now that we have the agent installed and the daemonset running, we need to get Kubernetes Labels uploaded 
+   into the Secure Workload instance. This will allow us to create inventory filters, scopes, application workplaces
+   and policies for our cloud native apps Yelb and NGINX.
+   
+   First thing we need to do is allow the Secure Workload instance read only access to ingest the labels from the 
+   kubernetes cluster. We created a terraform file to do this for us named `secure_workload_clusterrolebinding`. To 
+   deploy these resources rename the file using the `.tf` extension, `secure_workload_clusterrolebinding.tf`. 
+   
+
+   
 
 ### Deploy Cisco Secure Cloud Native
 **(OPTIONAL)**
