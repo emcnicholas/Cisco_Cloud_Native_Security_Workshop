@@ -50,8 +50,12 @@ to your project directory and move into the /Cisco_Cloud_Native_Security_Worksho
    ```
 
 
-2. We will be building out this environment in the **Lab_Build** directory. If you take a look into the directory  
-   We need to create a few global variables in our project. Terraform uses a *variable definitions file* to 
+2. We will be building out this environment locally using the **Lab_Build** directory. If you take a look into the 
+   directory we will have all the terraform and ansible file need to deploy our infrastructure. 
+   
+   Open the 
+   [terraform.tfvars](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/terraform.tfvars)
+   file first. We need to create a few global variables in our project. Terraform uses a *variable definitions file* to 
    set these global variables. The file must be named `terraform.tfvars` or any name ending in `.auto.tfvars`. In this 
    case we created a file called `terraform.tfvars`. Let's take a look at the file:
    
@@ -75,7 +79,7 @@ to your project directory and move into the /Cisco_Cloud_Native_Security_Worksho
    ```
 
    These variables are defined globally, so they will be passed to any variables declared in any other terraform files in this
-   project. These variables must be assigned. Here we configure the 
+   project. **These variables must be assigned!** Here we configure the 
    * `aws_access_key` and `aws_secret_key` to authenticate to the AWS API 
    * AWS Availability zones `aws_az1` and `aws_az2`
    * VPC `region` and availability zone (`aws_az1` and `aws_az2`)
@@ -96,8 +100,8 @@ to your project directory and move into the /Cisco_Cloud_Native_Security_Worksho
    The top directory, in this case `Lab_Build` is assigned to the **Root** module. We can create multiple directories 
    under the root module that would be defined as **Nested Modules**. In part 1 we will only be using the **Root**
    module to develop our IaC, but in part 2 we will use **Nested Modules** to partition our code.
-   Open the [variables.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Infrastructure/blob/main/variables.tf).
-   **Copy and paste it into `Lab_Build` directory.** The `variables.tf` file will define all the variables used in the 
+   Open the [variables.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/variables.tf).
+   The `variables.tf` file will define all the variables used in the 
    **Root** module. Like I said above, the `terraform.tfvars` file sets global variables for all modules, but this
    `variables.tf` file sets variables just for the root module. The cool thing about the variables set in this file is 
    that we can now set defaults. What this allows us to do is only set variables in the `terraform.tfvars` files that
@@ -153,8 +157,8 @@ In the following steps we configure code to deploy a VPC, EKS Cluster, and FTDv 
    
    We can add these providers to any of our terraform files, but in our case we added them to the `main.tf`
    file. Open the 
-   [main.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Infrastructure/blob/main/main.tf) file. 
-   **Copy and paste it into `Lab_Build` directory.**
+   [main.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/main.tf) file and
+   take a look.
 
    ```
    // Providers //
@@ -207,15 +211,16 @@ In the following steps we configure code to deploy a VPC, EKS Cluster, and FTDv 
    * Elastic IP address (public IP addresses)
    
    All these resources deploy the AWS network infrastructure. Open file  
-   [vpc.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Infrastructure/blob/main/vpc.tf) file. 
-   **Copy and paste it into `Lab_Build` directory.**
+   [vpc.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/vpc.tf) file and
+   take a look.
 
    
-3. Now that there is a network, next we create a file for the Cisco Secure Firewall (FTDv) instance called `ftdv.tf`. 
+3. Now that there is a network, next we created a file for the Cisco Secure Firewall (FTDv) instance called `ftdv.tf`. 
    The FTDv will attach to all the network interfaces and subnets assigned in the `vpc.tf` file. Let's take a look at 
-   the [ftdv.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Terraform/ftdv.tf) file.
+   the [ftdv.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/ftdv.tf) file.
    
-   First we pull the AWS AMI data source ([what's a data source?](https://www.terraform.io/docs/language/data-sources/index.html))
+   First we pull the AWS AMI data source 
+   ([what's a data source?](https://www.terraform.io/docs/language/data-sources/index.html))
    from the AWS Marketplace:
 
    ```
@@ -289,7 +294,7 @@ In the following steps we configure code to deploy a VPC, EKS Cluster, and FTDv 
    
    Also notice the `"template_file" "startup_file"` data source. This refers to a `startup_file.json` file
    we want to bootstrap the AWS instance. In this case the 
-   [startup_file.json](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Terraform/startup_file.json) 
+   [startup_file.json](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/startup_file.json) 
    contains the FTDv admin password, hostname, and management type:
    ```
    {
@@ -301,13 +306,13 @@ In the following steps we configure code to deploy a VPC, EKS Cluster, and FTDv 
 
 4. Now we add AWS EKS to deploy are application on. In this use case we are only using 1 worker node with no load
    balancing instance (just to save some money). We created the `eks.tf` file which deploys our EKS cluster and worker nodes.
-   In addition to the snippet below there are also other resources created such as AWS IAM Roles, Policies, and 
+   In addition to the snippet below there are other resources created such as AWS IAM Roles, Policies, and 
    Security Groups.
    
-   Check out the [eks.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Terraform/eks.tf) 
+   Check out the [eks.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/eks.tf) 
    file.
    ```
-   ...
+   ...data omitted
    
    // Kubernetes Master Cluster //
    resource "aws_eks_cluster" "eks_cluster" {
@@ -325,7 +330,7 @@ In the following steps we configure code to deploy a VPC, EKS Cluster, and FTDv 
      ]
    }
    
-   ...
+   ...data omitted
    
    resource "aws_launch_configuration" "eks-node-launch-config" {
      associate_public_ip_address = false
@@ -364,12 +369,12 @@ In the following steps we configure code to deploy a VPC, EKS Cluster, and FTDv 
      }
    }
    
-   ...
+   ...data omitted
    
    ```
    
-   The infrastructure is up and running. We created all our variables, deployed VPC, Cisco Secure Firewall (FTDv), and
-   an EKS cluster in AWS. Now it is time to start working with **Ansible** to configure the FTDv Policy. 
+   We configured all our variables, VPC, Cisco Secure Firewall (FTDv), and
+   an EKS cluster for AWS. Now it is time to start working with **Ansible** to configure the FTDv Policy. 
    
 
 ### Using Ansible for Configuration Management
@@ -377,11 +382,11 @@ We will use Ansible to configure the Cisco Secure Firewall (FTDv) policy. We wil
 accepting the EULA, configuring the Interfaces, Security zones, NAT, Access Control Policy, Routes, and Network/Service
 objects.
 
-1. The infrastructure is built, and we need to start putting some policy in place. To do this we need some information 
+1. After the infrastructure gets built, and we need to start putting some policy in place. To do this we need some information 
    from Terraform such as the FTDv management, EKS internal, and EKS external IP addresses. To get this info we created a 
    terraform file named `ftd_host_file.tf`. This file will pull this information from Terraform and create an Ansible
    hosts (inventory) file. Let's take a look at the 
-   [ftd_host_file.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Terraform/ftd_host_file.tf).
+   [ftd_host_file.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/ftd_host_file.tf).
    
    ```
    // Create inventory file with AWS IP address variables //
@@ -410,22 +415,50 @@ objects.
              eks_inside_ip: ${data.aws_instance.eks_node_instance.private_ip}
              eks_outside_ip: ${aws_eip_association.eks_outside_ip_association.private_ip_address}
        EOT
-       filename = "../Ansible/hosts.yaml"
+       filename = "${path.module}/Ansible/hosts.yaml"
    }
    ```
    
    Once again we use another data source to get the IP address of the EKS worker node. Then we grabbed the IP address 
    of the FTDv management interface, added the FTD username and password from our variables, and the EKS outside IP 
-   address. We create this file in the `/Ansible` directory so it can be used with the Ansible playbooks we will discuss
+   address. We create this file in the `/Ansible` directory, so it can be used with the Ansible playbooks we will discuss
    next.
    
 
 2. Now let's take a look into the `/Ansible` directory to review the playbooks we will run on our FTDv instance. There 
-   are 2 files located in this directory, `ftd_initial_provisioning.yaml` and `ftd_configuration.yaml`. There is a 3rd
-   file that will be generated by `ftd_host_file.tf`, which will be `hosts.yaml` (this won't be visible until after the
-   terraform apply). Let's look at the 
-   [ftd_initial_provisioning.yaml](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Ansible/ftd_initial_provisioning.yaml)
-   file.
+   are 3 files located in this directory, `ftd_status.tf`, `ftd_initial_provisioning.yaml` and `ftd_configuration.yaml`. 
+   There is a 4th file that will be generated by `ftd_host_file.tf`, which will be `hosts.yaml` (this won't be visible 
+   until after the terraform apply). 
+   
+   First let's open the 
+   [ftd_status.yaml](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/Ansible/ftd_status.yaml)
+   . This playbook just polls the FTD Management interface until it gets a response code of 200. This way the other 
+   playbooks won't run until the API is available. 
+   
+   ```
+   - hosts: ftd
+     connection: local
+     tasks:
+       - name: Pause play until the FTD mgmt interface is reachable from this host
+         uri:
+           url: "https://{{ ansible_host }}"
+           follow_redirects: none
+           method: GET
+           validate_certs: false
+         register: _result
+         until: _result.status == 200
+         retries: 120 # 120 * 10 seconds = 20 minutes
+         delay: 10 # Every 5 seconds
+       - debug:
+           var: _result
+   ```
+   
+   The next file, 
+   [ftd_initial_provisioning.yaml](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/Ansible/ftd_initial_provisioning.yaml), 
+   is used for to take care of the initial provisioning of the FTD. 
+   When an FTDv gets spun up there is an End User License Agreement (EULA) that needs to be accepted, and an evaluation 
+   license (90 days) for all its features needs to be enabled. The `ftd_initial_provisioning.yaml` takes care of this 
+   for us.
    
    ```
    #NGFW Initial Configuration File
@@ -466,16 +499,11 @@ objects.
            ansible_command_timeout: 30
    ```
 
-   This file will take care of the initial provisioning of the FTD. When an FTDv gets spun up there is an End User 
-   License Agreement (EULA) that needs to be accepted, and an evaluation license (90 days) for all its features needs to 
-   be enabled. The `ftd_initial_provisioning.yaml` takes care of this for us.
-
-   
 3. After the initial provisioning of the FTDv is completed we will run the `ftd_configuration.yaml` to configure the FTDv
    policies. This playbook will configure interfaces, network objects, service objects, NAT, security zones, access
    control policies, and deploy the configuration to the FTDv instance. This configuration is too large to take a 
    snippet on this doc, but you can take a look at it at 
-   [ftd_configuration.yaml](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Ansible/ftd_configuration.yaml).
+   [ftd_configuration.yaml](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/Ansible/ftd_configuration.yaml).
    As you can see this ansible playbook creates access rules, NATs, network and service objects for two applications,
    YELB and NGINX. We will dive a little deeper into them applications later in this doc, but these are the 2 apps that
    we will be securing!!!
@@ -486,14 +514,24 @@ objects.
    together to make sure our code works before integrating into a pipeline tool in Part 2. We created an `ansible_deploy.tf`
    file that will run our Ansible playbooks as a terraform resource after our infrastructure has been brought up. 
    Let's take a look at the 
-   [ansible_deploy.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Terraform/ansible_deploy.tf) file.
+   [ansible_deploy.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/ansible_deploy.tf) 
+   file.
    
    ```
-   // Initial FTP provisioning //
-   resource "null_resource" "ftd_init_prov" {
+   // Check Status of FTD Management - Make sure it is responding //
+   resource "null_resource" "ftd_status" {
      depends_on = [local_file.host_file]
      provisioner "local-exec" {
-         working_dir = "../ansible"
+         working_dir = "${path.module}/Ansible"
+         command = "docker run -v $(pwd):/ftd-ansible/playbooks -v $(pwd)/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_status.yaml"
+     }
+   }
+   
+   // Initial FTP provisioning //
+   resource "null_resource" "ftd_init_prov" {
+     depends_on = [null_resource.ftd_status]
+     provisioner "local-exec" {
+         working_dir = "${path.module}/Ansible"
          command = "docker run -v $(pwd):/ftd-ansible/playbooks -v $(pwd)/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_initial_provisioning.yaml"
      }
    }
@@ -502,7 +540,7 @@ objects.
    resource "null_resource" "ftd_conf" {
      depends_on = [null_resource.ftd_init_prov]
      provisioner "local-exec" {
-         working_dir = "../ansible"
+         working_dir = "${path.module}/Ansible"
          command = "docker run -v $(pwd):/ftd-ansible/playbooks -v $(pwd)/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml"
      }
    }
@@ -516,8 +554,7 @@ objects.
 
 ### Working with Kubernetes using Terraform
 
-In this section we configure Kubernetes resources using Terraform. We will create two applications, Yelb and Nginx,
-that we will use to test with.
+In this section we configure Kubernetes resources using Terraform.
 
 1. First lets take a look at the Kubernetes providers we will initialize. At the beginning of the code we tell terraform 
    what version of the provider is required. This is very important because some features we us in our IaC may be 
@@ -574,7 +611,8 @@ that we will use to test with.
    do this we need to apply a [Config Map](https://kubernetes.io/docs/concepts/configuration/configmap/) in 
    kubernetes. It is initially created to allow your nodes to join your cluster, but you also use this ConfigMap to add 
    RBAC access to IAM users and roles. Here we created a file called `config_map_aws_auth.tf`. Lets talk a look at 
-   [config_map_aws_auth.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Terraform/config_map_aws_auth.tf).
+   [config_map_aws_auth.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/config_map_aws_auth.tf)
+   file.
    
    ```
    // Apply Config Map AWS Auth //
@@ -603,10 +641,10 @@ that we will use to test with.
    
 
 ### Provision the Infrastructure as Code
-At this point you are ready to provision all the code in the the `/terraform` directory. The code at this point will 
+At this point you are ready to provision all the code in the the `/Lab_Build` directory. The code at this point will 
 provision a VPC, FTDv Instance, EKS Cluster and EKS Node *(the provisioning of Cisco Secure Cloud Analytics,
 Secure Workload, and Secure Cloud Native are adding in later steps that are optional but recommended)*.
-This means running the *terraform plan* and *terraform apply* commands in the directory we are working in. The `terraform
+This means running the *terraform init, plan, and apply* commands in the directory we are working in. The `terraform
 plan` command creates an execution plan by reading the current state of any already-existing remote objects to make sure 
 that the Terraform state is up-to-date, comparing the current configuration to the prior state and noting any 
 differences, and proposing a set of change actions that should, if applied, make the remote objects match the 
@@ -614,7 +652,7 @@ configuration. The `terraform apply` command executes the actions proposed in a 
 For more information about terraform provisioning, see 
 [Provisioning Infrastructure with Terraform](https://www.terraform.io/docs/cli/run/index.html).
 
-1. Make sure you are in the `/terraform` directory. Run the `terraform init` command. The 
+1. Make sure you are in the `/Lab_Build` directory. Run the `terraform init` command. The 
    [terraform init](https://www.terraform.io/docs/cli/commands/init.html) command is used
    to initialize a working directory containing Terraform configuration files. This is the first command that should be 
    run after writing a new Terraform configuration or cloning an existing one from version control. It is safe to run 
@@ -764,6 +802,9 @@ different, so make sure to use the outputs from your `terraform apply`.
    `aws eks --region <aws-region> update-kubeconfig --name <cluster-name>`
 
    For example `aws eks --region us-east-2 update-kubeconfig --name CNS_LAB_55`
+
+
+### Deploy Applications
 
 
 ### Deploy Cisco Secure Cloud Analytics
