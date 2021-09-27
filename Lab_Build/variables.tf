@@ -98,6 +98,23 @@ variable "remote_hosts" {
   default = ["0.0.0.0/0"]
 }
 
+// Secure Cloud Analytics Service Key //
+// Uncomment the variable below if deploying Secure Cloud Analytics
+//variable "sca_service_key" {}
+
+// Secure Cloud Workload API Key and Secret//
+// Uncomment the 3 variables below if deploying Secure Workload
+//variable "secure_workload_api_key" {}
+//variable "secure_workload_api_sec" {}
+//variable "secure_workload_api_url" {
+//  default = "https://<secure_workload_host>"
+//}
+
+// Secure Cloud Native Access and Secret Key //
+// Uncomment the 2 variables below if deploying Secure Cloud Native
+//variable "securecn_access_key" {}
+//variable "securecn_secret_key" {}
+
 // Local Variables used for multi-site deployments //
 locals {
   eks_cluster_name = "${var.cluster-name}_${var.lab_id}"
