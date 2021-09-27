@@ -804,6 +804,12 @@ different, so make sure to use the outputs from your `terraform apply`.
    For example `aws eks --region us-east-2 update-kubeconfig --name CNS_LAB_55`
 
 
+The infrastructure is now deployed and being secured by Cisco Secure Firewall. This provides us protections for inbound 
+and outbound traffic (North/South), which is great, but how do we protect laterally between workloads and applications 
+behind the Firewall.
+That is what we are going to dive into in the next few sections, but first we need some cloud native applications to 
+secure.
+
 ### Deploy Applications
 There are a couple ways we can deploy the applications that will reside in the kubernetes cluster. We can use the 
 **Kubernetes Provider** to deploy resources such as namaspaces, services, and deployments. We can use the **Kubectl
@@ -813,11 +819,180 @@ everything about that deployment needs to be managed by Terraform. The good thin
 kubernetes resource using Terraform, but any changes outside the terraform file will be removed. If we use the Kubectl 
 Provider, it will deploy a resource using native YAML file, which makes it easier to use community writen manifests,
 but now this resource is tracked as a full manifest, and not each service like the Kubernetes Provider. Using the 
-Local Provisioner should always be a last resort, but it quick and easy way to get up and going if you are a *kubectl*
-cli user. There is no state when using the Local Provisioner. 
+Local Provisioner should always be a last resort, but it is a quick and easy way to get up and going if you are a *kubectl*
+cli user. There is no state when using the Local Provisioner, so terraform will not track and changes.
 
-In Part 1 we will deploy our applications using the Kubernetes Provider. 
+1. In Part 1 we will deploy our applications using the Kubernetes Provider. In the `Lab_Build` directory there are two 
+files named `yelb_app` and `nginx.app`. Change the names to use the `.tf` extension, `yelb_app.tf` and `nginx_app.tf`.
+   
 
+2. Yelb is a cool 3 tier demo app that allows users to vote on a set of alternatives 
+   (restaurants) and dynamically updates pie charts based on number of votes received. If you want some more details
+   about this app check out the [Yelb GitHub](https://github.com/mreferre/yelb). For this app we built a terraform file
+   named `yelb_app.tf`. In this file we create kubernetes resources such as `kubernetes_namespace`, `kubernetes_service`,
+   and `kubernetes_deployment`. Below is an example for just the Yelb web server resources. Take a look at the full manifest at 
+   [yelb_app](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/yelb_app) for 
+   all the services and pods that are created for the Yelb application.
+   
+   ```
+   resource "kubernetes_namespace" "yelb_ns" {
+     depends_on = [kubectl_manifest.config_map_aws_auth]
+     metadata {
+       name = "yelb"
+     }
+   }
+   resource "kubernetes_service" "yelb_ui" {
+     depends_on = [kubernetes_namespace.yelb_ns]
+     metadata {
+       name = "yelb-ui"
+       namespace = "yelb"
+       labels = {
+         app = "yelb-ui"
+         tier = "frontend"
+         environment = "cns_lab"
+       }
+     }
+     spec {
+       type = "NodePort"
+       port {
+         port = "80"
+         protocol = "TCP"
+         target_port = "80"
+         node_port = "30001"
+       }
+       selector = {
+         app = "yelb-ui"
+         tier = "frontend"
+       }
+     }
+   }
+   resource "kubernetes_deployment" "yelb_ui" {
+     metadata {
+       name = "yelb-ui"
+       namespace = "yelb"
+     }
+     spec {
+       replicas = 1
+       selector {
+         match_labels = {
+           app = "yelb-ui"
+           tier = "frontend"
+         }
+       }
+       template {
+         metadata {
+           labels = {
+             app = "yelb-ui"
+             tier = "frontend"
+             environment = "cns_lab"
+           }
+         }
+         spec {
+           container {
+             name = "yelb-ui"
+             image = "mreferre/yelb-ui:0.7"
+             port {
+               container_port = 80
+             }
+           }
+         }
+       }
+     }
+   }
+   ```
+
+
+3. We also configure a second app using the `nginx_app.tf` file. This app is just a NGINX test page that we can play
+   with when testing out security controls. Check out the configuration of that app at 
+   [nginx_app.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/nginx_app).
+   
+4. Run the `terraform plan -out tfplan` and `terraform apply "tfplan"` again to deploy these applications.
+
+   ```
+   Plan: 9 to add, 0 to change, 1 to destroy.
+   
+   ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   
+   Saved the plan to: tfplan
+   
+   To perform exactly these actions, run the following command to apply:
+       terraform apply "tfplan"
+   [devbox Lab_Build]$ terraform apply "tfplan"
+   null_resource.deploy_yelb_app: Destroying... [id=5942784377980066240]
+   null_resource.deploy_yelb_app: Destruction complete after 0s
+   kubernetes_namespace.yelb_ns: Creation complete after 0s [id=yelb]
+   kubernetes_service.yelb_ui: Creation complete after 0s [id=yelb/yelb-ui]
+   kubernetes_service.yelb_appserver: Creation complete after 0s [id=yelb/yelb-appserver]
+   kubernetes_service.yelb_redis_service: Creation complete after 0s [id=yelb/redis-server]
+   kubernetes_service.yelb_db_service: Creation complete after 0s [id=yelb/yelb-db]
+   kubernetes_deployment.redis_server: Creation complete after 46s [id=yelb/redis-server]
+   kubernetes_deployment.yelb_ui: Creation complete after 46s [id=yelb/yelb-ui]
+   kubernetes_deployment.yelb_db: Creation complete after 46s [id=yelb/yelb-db]
+   kubernetes_deployment.yelb_appserver: Creation complete after 46s [id=yelb/yelb-appserver]
+   
+   Apply complete! Resources: 9 added, 0 changed, 1 destroyed.
+   
+   Outputs:
+   
+   eks_cluster_name = "CNS_Lab_Test"
+   eks_public_ip = "18.117.14.78"
+   ftd_mgmt_ip = "18.119.87.234"
+   ```
+
+
+5. Access the Yelb app by going to `http://<eks_public_ip>:30001` where <eks_public_ip> is the IP address of
+   the terraform output `eks_public_ip`, for example in this case `http://18.117.14.78:30001. Where did that service
+   port come from?
+   
+   ![Yelb UI](/images/yelb.png)
+
+6. Access the NGINX app by going to `http://<eks_public_ip>:30201` where <eks_public_ip> is the IP address of
+   the `eks_public_ip` output.
+   
+   ![NGINX UI](/images/nginx.png)
+
+7. Verify the kubernetes environment using the kubectl client.
+   1. Update the kube config file by running `aws eks --region <aws-region> update-kubeconfig --name <eks-cluster-name>` 
+      where <eks-cluster-name> is the name of the `eks_cluster_name` output and the <aws-region> is the region you are
+      deploying to.
+
+      ```
+      Terraform % aws eks --region us-east-2 update-kubeconfig --name CNS_Lab_1
+      Added new context arn:aws:eks:us-east-2:208176673708:cluster/CNS_Lab_1 to /Users/edmcnich/.kube/config
+      ```
+      
+   2. Run some commands to verify the resources were implemented. Run `kubectl get nodes` which will show what EKS 
+      worker nodes are available to the cluster. In this lab it is just one node. Run `kubectl get ns` to see the 
+      Yelb and NGINX namespaces we created. Run `kubectl get pods -n yeb` to see all th pods we created in the Yelb
+      namespace. Run `kubectl get service -n yelb` to view all the services we created for the Yelb namespace.
+      
+      ```
+      Terraform % kubectl get nodes
+      NAME                                      STATUS   ROLES    AGE   VERSION
+      ip-10-0-1-90.us-east-2.compute.internal   Ready    <none>   10m   v1.21.2-eks-55daa9d
+      Terraform % kubectl get ns
+      NAME              STATUS   AGE
+      default           Active   21m
+      kube-node-lease   Active   21m
+      kube-public       Active   21m
+      kube-system       Active   21m
+      nginx             Active   10m
+      yelb              Active   10m
+      Terraform % kubectl get pods -n yelb
+      NAME                              READY   STATUS    RESTARTS   AGE
+      redis-server-65977ffd-t24dj       1/1     Running   0          10m
+      yelb-appserver-594494c5fd-htllt   1/1     Running   0          10m
+      yelb-db-79687c7fbc-xpbll          1/1     Running   0          10m
+      yelb-ui-5f446b88f9-lghq5          1/1     Running   2          10m
+      Terraform % kubectl get service -n yelb
+      NAME             TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+      redis-server     ClusterIP   172.20.243.191   <none>        6379/TCP       11m
+      yelb-appserver   ClusterIP   172.20.158.193   <none>        4567/TCP       11m
+      yelb-db          ClusterIP   172.20.214.165   <none>        5432/TCP       11m
+      yelb-ui          NodePort    172.20.8.98      <none>        80:30001/TCP   11m
+      ``` 
+
+Awesome, now we have cloud native apps to play with. Let's see how we can secure them!!!
 
 ### Deploy Cisco Secure Cloud Analytics
 **(OPTIONAL)**
@@ -829,7 +1004,7 @@ you can sign up for a free trial
 This section will show how to deploy **Cisco Secure Cloud Analytics** to this Cloud Native environment. 
 [Secure Cloud Analytics](https://www.cisco.com/c/en/us/products/security/stealthwatch-cloud/index.html) 
 provides the visibility and threat detection capabilities you need to keep your workloads highly 
-secure in all major cloud environments like Amazon Web Services (AWS), Microsoft Azure, and Google Cloud Platform. And 
+secure in all major cloud environments like Amazon Web Services (AWS), Microsoft Azure, and Google Cloud Platform, and 
 guess what, it supports integration directly with the kubernetes cluster. 
 
 1. Log in to your Secure Cloud Analytics portal and go to `Setting` then `Integrations`. 
@@ -1158,131 +1333,4 @@ Plan: 1 to add, 0 to change, 0 to destroy.
 ### Deploy Test Applications
 In part 1 we will be deploying our applications
 
-3. Let's deploy some apps to secure. Yelb is a cool 3 teir demo app that allows users to vote on a set of alternatives 
-   (restaurants) and dynamically updates pie charts based on number of votes received. If you want some more details
-   about this app check out the [Yelb GitHub](https://github.com/mreferre/yelb). For this app we built a terraform file
-   named `yelb_app.tf`. In this file we create kubernetes resources such as `kubernetes_namespace`, `kubernetes_service`,
-   and `kubernetes_deployment`. Below is an example for just the yelb web server. Take a look at the full manifest at 
-   [yelb_app.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Terraform/yelb_app.tf) for 
-   all the services and pods that are created for the Yelb application.
-   ```
-   resource "kubernetes_namespace" "yelb_ns" {
-     depends_on = [kubectl_manifest.config_map_aws_auth]
-     metadata {
-       name = "yelb"
-     }
-   }
-   resource "kubernetes_service" "yelb_ui" {
-     depends_on = [kubernetes_namespace.yelb_ns]
-     metadata {
-       name = "yelb-ui"
-       namespace = "yelb"
-       labels = {
-         app = "yelb-ui"
-         tier = "frontend"
-         environment = "cns_lab"
-       }
-     }
-     spec {
-       type = "NodePort"
-       port {
-         port = "80"
-         protocol = "TCP"
-         target_port = "80"
-         node_port = "30001"
-       }
-       selector = {
-         app = "yelb-ui"
-         tier = "frontend"
-       }
-     }
-   }
-   resource "kubernetes_deployment" "yelb_ui" {
-     metadata {
-       name = "yelb-ui"
-       namespace = "yelb"
-     }
-     spec {
-       replicas = 1
-       selector {
-         match_labels = {
-           app = "yelb-ui"
-           tier = "frontend"
-         }
-       }
-       template {
-         metadata {
-           labels = {
-             app = "yelb-ui"
-             tier = "frontend"
-             environment = "cns_lab"
-           }
-         }
-         spec {
-           container {
-             name = "yelb-ui"
-             image = "mreferre/yelb-ui:0.7"
-             port {
-               container_port = 80
-             }
-           }
-         }
-       }
-     }
-   }
-   ```
-
-4. We also configured a second app using the `nginx_app.tf` file. This app is just a NGINX test page that we can play
-   with when testing out security controls. Check out the configuration of that app at 
-   [nginx_app.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Part1/blob/main/Terraform/nginx_app.tf).
-   
-
-3. Access the Yelb app by going to `http://<eks_public_ip>:<yelb_service_port>` where <eks_public_ip> is the IP address of
-   the `eks_public_ip` output and <yelb_service_port> is the port of the `yelb_service_port`.
-   
-   ![Yelb UI](/images/yelb.png)
-
-4. Access the NGINX app by going to `http://<eks_public_ip>:<nginx_service_port>` where <eks_public_ip> is the IP address of
-   the `eks_public_ip` output and <nginx_service_port> is the port of the `nginx_service_port`.
-   
-   ![NGINX UI](/images/nginx.png)
-
-5. Verify the kubernetes environment using the kubectl client.
-   1. Update the kube config file by running `aws eks --region us-east-2 update-kubeconfig --name <eks-cluster-name>` 
-      where <eks-cluster-name> is the name of the `eks_cluster_name` output.
-
-      ```
-      Terraform % aws eks --region us-east-2 update-kubeconfig --name CNS_Lab_1
-      Added new context arn:aws:eks:us-east-2:208176673708:cluster/CNS_Lab_1 to /Users/edmcnich/.kube/config
-      ```
-      
-   2. Run some commands to verify the resources were implemented. Run `kubectl get nodes` which will show what EKS 
-      worker nodes are available to the cluster. In this lab it is just one node. Run `kubectl get ns` to see the 
-      Yelb and NGINX namespaces we created. Run `kubectl get pods -n yeb` to see all th pods we created in the Yelb
-      namespace. Run `kubectl get service -n yelb` to view all the services we created for the Yelb namespace.
-      
-      ```
-      Terraform % kubectl get nodes
-      NAME                                      STATUS   ROLES    AGE   VERSION
-      ip-10-0-1-90.us-east-2.compute.internal   Ready    <none>   10m   v1.21.2-eks-55daa9d
-      Terraform % kubectl get ns
-      NAME              STATUS   AGE
-      default           Active   21m
-      kube-node-lease   Active   21m
-      kube-public       Active   21m
-      kube-system       Active   21m
-      nginx             Active   10m
-      yelb              Active   10m
-      Terraform % kubectl get pods -n yelb
-      NAME                              READY   STATUS    RESTARTS   AGE
-      redis-server-65977ffd-t24dj       1/1     Running   0          10m
-      yelb-appserver-594494c5fd-htllt   1/1     Running   0          10m
-      yelb-db-79687c7fbc-xpbll          1/1     Running   0          10m
-      yelb-ui-5f446b88f9-lghq5          1/1     Running   2          10m
-      Terraform % kubectl get service -n yelb
-      NAME             TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
-      redis-server     ClusterIP   172.20.243.191   <none>        6379/TCP       11m
-      yelb-appserver   ClusterIP   172.20.158.193   <none>        4567/TCP       11m
-      yelb-db          ClusterIP   172.20.214.165   <none>        5432/TCP       11m
-      yelb-ui          NodePort    172.20.8.98      <none>        80:30001/TCP   11m
-      ```  
+ 
