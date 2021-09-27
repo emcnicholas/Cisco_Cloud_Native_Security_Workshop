@@ -805,6 +805,18 @@ different, so make sure to use the outputs from your `terraform apply`.
 
 
 ### Deploy Applications
+There are a couple ways we can deploy the applications that will reside in the kubernetes cluster. We can use the 
+**Kubernetes Provider** to deploy resources such as namaspaces, services, and deployments. We can use the **Kubectl
+Provider** to deploy a YAML manifest file, or we can use the **Local Provisioner** to run the *kubectl create* commands.
+Each option has their pluses and minuses. For example, if we deploy resources using the Kubernetes Provider, than 
+everything about that deployment needs to be managed by Terraform. The good thing is we can easily deploy any 
+kubernetes resource using Terraform, but any changes outside the terraform file will be removed. If we use the Kubectl 
+Provider, it will deploy a resource using native YAML file, which makes it easier to use community writen manifests,
+but now this resource is tracked as a full manifest, and not each service like the Kubernetes Provider. Using the 
+Local Provisioner should always be a last resort, but it quick and easy way to get up and going if you are a *kubectl*
+cli user. There is no state when using the Local Provisioner. 
+
+In Part 1 we will deploy our applications using the Kubernetes Provider. 
 
 
 ### Deploy Cisco Secure Cloud Analytics
