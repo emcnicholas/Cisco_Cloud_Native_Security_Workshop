@@ -1024,10 +1024,17 @@ guess what, it supports integration directly with the kubernetes cluster.
    
    ![Secure Cloud Analytics Secret Key](/images/swc-key.png)
 
-4. Go to the `terraform.tfvars` file and add this key to the Secure Cloud Analytics `sca_service_key` variable.
+4. Go to the `terraform.tfvars` file and add this key to the Secure Cloud Analytics `sca_service_key` variable. Make
+   sure to uncomment (`//`) variable
 
    ```
    sca_service_key    = "<secret_key>"
+   ```
+   
+   Go to the `variables.tf` file and uncomment the variable there as well
+
+   ```
+   variable "sca_service_key" {}
    ```
    
 5. Find the file named `secure_cloud_analytics` and change it to `secure_cloud_analytics.tf` so terraform can read it.
@@ -1241,6 +1248,91 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    First thing we need to do is allow the Secure Workload instance read only access to ingest the labels from the 
    kubernetes cluster. We created a terraform file to do this for us named `secure_workload_clusterrolebinding`. To 
    deploy these resources rename the file using the `.tf` extension, `secure_workload_clusterrolebinding.tf`. 
+   Go to the `terraform.tfvars` file and add the Secure Workload Key, Secret and URL to the variables. Make
+   sure to uncomment (`//`) variable
+   
+   ```
+   secure_workload_api_key = ""
+   secure_workload_api_sec = ""
+   secure_workload_api_url = "https://<secure_workload_host>"
+   ```
+   
+   Go to the `variables.tf` file and uncomment the variable there as well
+   
+   ```
+   //variable "secure_workload_api_key" {}
+   //variable "secure_workload_api_sec" {}
+   //variable "secure_workload_api_url" {
+   //  default = "https://<secure_workload_host>"
+   ```
+   
+   Run `terraform plan -out tfplan` and `terraform apply "tfplan"`
+
+   ```
+   [devbox Lab_Build]$ terraform apply "tfplan"
+   kubernetes_cluster_role_binding.tetration-read-only: Creating...
+   kubernetes_cluster_role.tetration-read-only: Creating...
+   kubernetes_service_account.tetration-read-only: Creating...
+   kubernetes_cluster_role_binding.tetration-read-only: Creation complete after 0s [id=tetration.read.only]
+   kubernetes_cluster_role.tetration-read-only: Creation complete after 0s [id=tetration.read.only]
+   kubernetes_service_account.tetration-read-only: Creation complete after 0s [id=default/tetration.read.only]
+   
+   Apply complete! Resources: 3 added, 0 changed, 0 destroyed.
+   ```
+   
+   We need to get the token for the `tetration.read.only` service account. To do this we need to get the service 
+   account `secrets name` and base64 decode the output of the token. Run the command 
+   `kubectl get serviceaccount -o yaml tetration.read.only` first. Get the name of the secret, for example in this case
+   `tetration.read.only-token-dnlqm`. Run the command 
+   `kubectl get secret <your secret name> --template "{{ .data.token }}" | base64 -d`. This will output the secret token.
+
+   ```
+   [devbox Lab_Build]$ kubectl get serviceaccount -o yaml tetration.read.only
+   apiVersion: v1
+   automountServiceAccountToken: true
+   kind: ServiceAccount
+   metadata:
+     creationTimestamp: "2021-09-27T19:04:23Z"
+     name: tetration.read.only
+     namespace: default
+     resourceVersion: "596080"
+     uid: 36003a9b-9a1b-471a-bd90-cfc8087b307a
+   secrets:
+   - name: tetration.read.only-token-dnlqm
+   [devbox Lab_Build]$ kubectl get secret tetration.read.only-token-dnlqm --template "{{ .data.token }}" | base64 -d
+   eyJhbGciOiJSUzI1...data omitted
+   ```
+   
+   Copy and save the token output. Go back to the Secure Workload dashboard. Select **Manage** and **External 
+   Orchestrators**. Select **Create New Configuration**.
+   
+   ![Secure Workload External Orchestrators](/images/sw-ext-orch.png)
+
+   On the **Create External Orchestrator Configuration** page select **Kubernetes** as the Type and Name it the same 
+   as your EKS Cluster name, for example `CNS_Lab_Test`.
+   
+   ![Secure Workload External Orchestrators](/images/sw-ext-orch-name.png)
+
+   Scroll down to `Auth Token` and paste the `tetration.read.only` token in this field.
+
+   ![Secure Workload External Orchestrators](/images/sw-ext-orch-auth.png)
+
+   Select `Hosts List` and add the hostname of the EKS Cluster API. You can get the hostname of the EKS Cluster API
+   from the AWS Dashboard. Log into your AWS portal and go to **Services** > **Containers** > **Elastic Kubernetes Service**.
+   From this page select **Amazon EKS** and **Clusters**. Select your EKS Cluster name, for example `CNS_Lab_Test`.
+   Select **Confirguration** and under **Details** you will see the `API server endpoint`. 
+   
+   ![AWS EKS API Server Endpoint](/images/sw-k8-api.png)
+
+   Copy the API server endpoint into the Hosts List of the External Orchestrator Configuration page. Make sure to
+   delete `https://` from the hostname field. Add `443` as the port number.
+   
+   ![Secure Workload External Orchestrators](/images/sw-ext-orch-host.png)
+   
+   Click **Create** and the portal should successfully connect to the cluster.
+
+   ![Secure Workload External Orchestrators](/images/sw-ext-org-success.png)
+   
    
 
    
