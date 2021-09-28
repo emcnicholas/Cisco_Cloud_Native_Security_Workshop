@@ -1,5 +1,5 @@
 // Secure Workload Configuration Terraform Resources //
-// To apply this file using terraform you must change file name to secure_workload.tf.tf //
+// To apply this file using terraform you must change file name to secure_workload.tf //
 
 // Cluster Scope
 resource "tetration_scope" "scope" {

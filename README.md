@@ -1260,10 +1260,10 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    Go to the `variables.tf` file and uncomment the variable there as well
    
    ```
-   //variable "secure_workload_api_key" {}
-   //variable "secure_workload_api_sec" {}
-   //variable "secure_workload_api_url" {
-   //  default = "https://<secure_workload_host>"
+   variable "secure_workload_api_key" {}
+   variable "secure_workload_api_sec" {}
+   variable "secure_workload_api_url" {
+     default = "https://<secure_workload_host>"
    ```
    
    Run `terraform plan -out tfplan` and `terraform apply "tfplan"`
@@ -1364,7 +1364,48 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    * user_orchestrator_system/pod_name
    * user_orchestrator_system/service_name
    
-4. 
+4. With the Secure Workload Daemonset deployed and External Orchestrator integrated we can now use Terraform to declare
+   policy as code. We first need to add the 
+   [Secure Workload Terraform Provider](https://github.com/CiscoDevNet/terraform-provider-tetration) to the `main.tf`
+   file. Uncomment the following Secure Workload provider configuration.
+   
+   ```
+   terraform {
+     required_providers {
+       tetration = {
+         source = "CiscoDevNet/tetration"
+         version = "0.1.0"
+       }
+     }
+   }
+   
+   provider "tetration" {
+      api_key = var.secure_workload_api_key
+      api_secret = var.secure_workload_api_sec
+      api_url = var.secure_workload_api_url
+      disable_tls_verification = false
+   }
+   ```
+   
+   Double check the `terraform.tfvars` and make sure the API Key, Secret, and URL are defined for Secure Workload. 
+   Make sure that the variables are uncommented on the `terraform.tfvars` and `variables.tf`. Run `terraform init` to
+   initialize the provider.
+   
+   ```
+   [devbox Lab_Build]$ terraform init
+   
+   Initializing the backend...
+   
+   Initializing provider plugins...
+   - Finding ciscodevnet/tetration versions matching "0.1.0"...
+   - Installing ciscodevnet/tetration v0.1.0...
+   - Installed ciscodevnet/tetration v0.1.0 (self-signed, key ID E10BA876A27B7DB3)
+   ```
+   
+   Now that the provider is initialized, let's build out the Secure Workload policy using Terraform resources. In the 
+   `Lab_Build` directory there is a file named [secure_workload][(). Change the name of this file to `secure_workload.tf`.
+   Open the 
+   
 
    
 
