@@ -9,6 +9,8 @@ Secure Workload, and Secure CN to provide security monitoring, policy, and contr
 In part 2 of series, we will take what we learned in part 1 and integrate the code into a continuous delivery pipeline
 using Jenkins and Github.
 
+![Cisco Cloud Native Security](/images/cns-diagram.png)
+
 ## Prerequisites
 The following software is mandatory to run this code successfully. Cisco Secure Firewall will be deployed using an eval license on AWS.
 All other solutions, such as Cisco Secure Cloud Analytic, Secure Workload, and Secure CN are **Optional**.
