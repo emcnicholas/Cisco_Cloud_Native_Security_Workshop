@@ -803,7 +803,7 @@ different, so make sure to use the outputs from your `terraform apply`.
    
    `aws eks --region <aws-region> update-kubeconfig --name <cluster-name>`
 
-   For example `aws eks --region us-east-2 update-kubeconfig --name CNS_LAB_55`
+   For example `aws eks --region us-east-2 update-kubeconfig --name CNS_LAB_Test`
 
 
 The infrastructure is now deployed and being secured by Cisco Secure Firewall. This provides us protections for inbound 
@@ -959,8 +959,8 @@ files named `yelb_app` and `nginx.app`. Change the names to use the `.tf` extens
       deploying to.
 
       ```
-      Terraform % aws eks --region us-east-2 update-kubeconfig --name CNS_Lab_1
-      Added new context arn:aws:eks:us-east-2:208176673708:cluster/CNS_Lab_1 to /Users/edmcnich/.kube/config
+      Terraform % aws eks --region us-east-2 update-kubeconfig --name CNS_Lab_Test
+      Added new context arn:aws:eks:us-east-2:208176673708:cluster/CNS_Lab_Test to /Users/edmcnich/.kube/config
       ```
       
    2. Run some commands to verify the resources were implemented. Run `kubectl get nodes` which will show what EKS 
@@ -1140,6 +1140,15 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    
    ![Secure Workload API](/images/sw-api.png)
 
+   We also need the Secure Workload hostname and Root Scope ID. Go to **`Organize`** > **`Scopes and Inventory`**. 
+   The Root Scope is the top scope in the scope tree, for example in this case the root scope is **`edmcnich`**.
+   Select the root scope and up in the URL field of the broswer you can see the hostname and Scope ID as highlighted
+   below. The Scope ID can be found in between `id=` and the `&chips` in the URL field.
+   
+   ![Secure Workload API](/images/sw-rootscopeid.png)
+
+   Save the Secure Workload API Key, Secret, Hostname, and Root Scope ID as we will need it in a few steps.
+
 2. The second thing we need is an agent. Secure Workload has always supported a wide variety of operating systems to 
    deploy sofware agents to, but Kubernetes is a little different. We could manually deploy an agent to every worker 
    node in our cluster, but that isn't very agile and doesn't give us the ability to create segmentation policy at the
@@ -1163,7 +1172,7 @@ surface, minimizes lateral movement in case of security incidents, and more quic
 
    Select **Kubernetes** as the platform to be installed on and **YES/NO** if your Kubernetes environment is going 
    through a proxy (add proxy info if it does). Click **Download Installer** to download the install script. Save the
-   install script to a directly on your Linux machine. 
+   install script to a directory on your Linux machine. 
    
    ![Secure Workload Agent Download](/images/sw-agent-download.png)
 
@@ -1181,7 +1190,7 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    bash tetration_daemonset_installer.sh --pre-check
    ```
    
-   If everything is good run the installer.
+   If all the requirements are fulfilled run the installer.
 
    ```
    [devbox Lab_Build]$ bash ~/Downloads/tetration_installer_edmcnich_enforcer_kubernetes_tet-pov-rtp1.sh
