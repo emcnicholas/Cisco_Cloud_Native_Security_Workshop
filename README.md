@@ -1402,9 +1402,102 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    - Installed ciscodevnet/tetration v0.1.0 (self-signed, key ID E10BA876A27B7DB3)
    ```
    
-   Now that the provider is initialized, let's build out the Secure Workload policy using Terraform resources. In the 
-   `Lab_Build` directory there is a file named [secure_workload][(). Change the name of this file to `secure_workload.tf`.
-   Open the 
+5. Now that the provider is initialized, let's build out the Secure Workload policy using Terraform resources. In the
+   `Lab_Build` directory there is a file named
+   [secure_workload](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/secure_workload). 
+   Open the file and take a look at the code.
+   
+   * At the top we define our Scopes. We create a cluster scope using a query filter using the kubernetes label
+   `user_orchestrator_system/cluster_name` that is equal to the EKS Cluster name. What this will do is create a scope
+   for all inventory associated with the cluster name, for example CNS_Lab_Test.
+     
+      ```
+      // Cluster Scope
+      resource "tetration_scope" "scope" {
+        short_name          = local.eks_cluster_name
+        short_query_type    = "eq"
+        short_query_field   = "user_orchestrator_system/cluster_name"
+        short_query_value   = local.eks_cluster_name
+        parent_app_scope_id = var.secure_workload_root_scope
+      }
+      ```
+   * Then we create a nested scope for the Yelb application which is with is using label `user_orchestrator_system/namespace`
+   which is equal to the Yelb Namespace. So all inventory with namespace named yelb will be added to this scope.
+     
+      ```
+      // Yelb App Scope
+      resource "tetration_scope" "yelb_app_scope" {
+        short_name          = "Yelb"
+        short_query_type    = "eq"
+        short_query_field   = "user_orchestrator_system/namespace"
+        short_query_value   = "yelb"
+        parent_app_scope_id = tetration_scope.scope.id
+      }
+      ```
+   * After the scopes we create inventory filters for the pods and services running in the cluster. Below is just a 
+   snippet of the Yelb DB service and pod filters. As you can see they are using the labels 
+   `user_orchestrator_system/service_name` and `user_orchestrator_system/pod_name`.
+   
+      ```
+      // Yelb App Filters
+      resource "tetration_filter" "yelb-db-srv" {
+        name         = "${local.eks_cluster_name} Yelb DB Service"
+        query        = <<EOF
+                          {
+                            "type": "eq",
+                            "field": "user_orchestrator_system/service_name",
+                            "value": "yelb-db"
+                          }
+                EOF
+        app_scope_id = tetration_scope.yelb_app_scope.id
+        primary      = true
+        public       = false
+      }
+      resource "tetration_filter" "yelb-db-pod" {
+        name         = "${local.eks_cluster_name} Yelb DB Pod"
+        query        = <<EOF
+                          {
+                            "type": "contains",
+                            "field": "user_orchestrator_system/pod_name",
+                            "value": "yelb-db"
+                          }
+                EOF
+        app_scope_id = tetration_scope.yelb_app_scope.id
+        primary      = true
+        public       = false
+      }
+      ...data omitted
+      ```
+     
+   * Finally, we create the Yelb application and policies, which we assign to the Yelb Scope. Here is snippet of the
+   application, and the first policy rule.
+   
+      ```
+      resource "tetration_application" "yelb_app" {
+        app_scope_id = tetration_scope.yelb_app_scope.id
+        name = "Yelb"
+        description = "3-Tier App"
+        alternate_query_mode = true
+        strict_validation = true
+        primary = false
+        absolute_policy {
+          consumer_filter_id = tetration_filter.any-ipv4.id
+          provider_filter_id = tetration_filter.yelb-ui-srv.id
+          action = "ALLOW"
+          layer_4_network_policy {
+            port_range = [80, 80]
+            protocol = 6
+          }
+        }
+      ...data omitted
+      ```
+   
+   Change the name of file `secure_workload` to `secure_workload.tf` and run `terraform plan -out tfplan` and 
+   `terraform apply "tfplan"` to deploy the resources.
+   
+   Verify the resources by going back into the Secure Workload dashboard. From the menu go to **`Organize`** > 
+   **`Scopes and Inventory`**
+   
    
 
    

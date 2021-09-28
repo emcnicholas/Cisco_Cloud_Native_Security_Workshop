@@ -106,9 +106,9 @@ variable "remote_hosts" {
 // Uncomment the 3 variables below if deploying Secure Workload
 //variable "secure_workload_api_key" {}
 //variable "secure_workload_api_sec" {}
-//variable "secure_workload_api_url" {
-//  default = "https://<secure_workload_host>"
-//}
+//variable "secure_workload_api_url" {}
+//variable "secure_workload_root_scope" {}
+
 
 // Secure Cloud Native Access and Secret Key //
 // Uncomment the 2 variables below if deploying Secure Cloud Native

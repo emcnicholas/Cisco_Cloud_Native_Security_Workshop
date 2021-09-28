@@ -7,7 +7,7 @@ resource "tetration_scope" "scope" {
   short_query_type    = "eq"
   short_query_field   = "user_orchestrator_system/cluster_name"
   short_query_value   = local.eks_cluster_name
-  parent_app_scope_id = "605bacee755f027875a0eef3"
+  parent_app_scope_id = var.secure_workload_root_scope
 }
 
 // Yelb App Scope

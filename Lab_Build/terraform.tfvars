@@ -24,6 +24,7 @@ key_name           = "" //SSH key created in AWS Region
 //secure_workload_api_key = ""
 //secure_workload_api_sec = ""
 //secure_workload_api_url = "https://<secure_workload_host>"
+//secure_workload_root_scope = ""
 
 // Secure Cloud Native
 // Uncomment the 2 lines below and add access key and secret key if deploying Secure Cloud Native
