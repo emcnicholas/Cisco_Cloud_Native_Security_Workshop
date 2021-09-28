@@ -1333,7 +1333,38 @@ surface, minimizes lateral movement in case of security incidents, and more quic
 
    ![Secure Workload External Orchestrators](/images/sw-ext-org-success.png)
    
+   Go back to **Manage** > **Agents** in the menu bar to the left. Select **`Agent List`** and 
+   click on the EKS Worker hosts. Under the **`Labels`** section there are now labels assigned 
+   to this host. The initial label we are interested in is `✻ orchestrator_system/cluster_name`
+   which defines labels from our EKS cluster, for example in this case `CNS_Lab_Test`.
    
+   ![Secure Workload Agent Labels](/images/sw-agent-labels.png)
+
+   Click through all the labels to get a sense of all the labels that are generated automatically
+   by the Kubernetes External Orchestrator integration. We will use these labels to create more 
+   defined Scopes for the cluster and apps.
+   
+   Next go to **`Organize`** > **`Scopes and Inventory`**. Make sure to select your **`Root`**
+   scope, for example in this case it is `edmcnich`. Here you will see services, pods, and 
+   workloads associated with the External Orchestrator.
+   
+   ![Secure Workload Scopes and Inventory](/images/sw-scope.png)
+
+   Select the **`Pods`** tab and click on the Pod Name starting with **`yelb-db`**. Here you 
+   see that the pods have labels too. 
+   
+   ![Secure Workload Scopes and Inventory](/images/sw-scope-pod.png)
+
+   Select the **`Services`** tab and drill into any of the `yelb` services. We are going to 
+   create Scopes, Inventory Filters, Workspaces (Applications), and Policies using these labels.
+   Here are some labels to take note of as we will be using them in our Secure Workload Terraform
+   files.
+   * user_orchestrator_system/cluster_name
+   * user_orchestrator_system/namespace
+   * user_orchestrator_system/pod_name
+   * user_orchestrator_system/service_name
+   
+4. 
 
    
 

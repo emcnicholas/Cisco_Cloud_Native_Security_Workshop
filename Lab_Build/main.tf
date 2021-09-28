@@ -14,6 +14,10 @@ terraform {
       source = "gavinbunney/kubectl"
       version = "1.11.3"
     }
+//    tetration = {
+//      source = "CiscoDevNet/tetration"
+//      version = "0.1.0"
+//    }
   }
 }
 provider "aws" {
@@ -48,3 +52,10 @@ provider "kubectl" {
   token = data.aws_eks_cluster_auth.eks_cluster_auth.token
   load_config_file       = false
 }
+
+//provider "tetration" {
+//  api_key = var.secure_workload_api_key
+//  api_secret = var.secure_workload_api_sec
+//  api_url = var.secure_workload_api_url
+//  disable_tls_verification = false
+//}
