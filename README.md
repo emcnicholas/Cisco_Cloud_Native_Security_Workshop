@@ -1398,9 +1398,25 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    }
    ```
    
-   Double check the `terraform.tfvars` and make sure the API Key, Secret, and URL are defined for Secure Workload. 
-   Make sure that the variables are uncommented on the `terraform.tfvars` and `variables.tf`. Run `terraform init` to
-   initialize the provider.
+   Go to the `terraform.tfvars` file and add the Secure Workload Key, Secret, URL and Root Scope ID to the variables. 
+   Make sure to uncomment if commented out (`//`).
+   
+   ```
+   secure_workload_api_key = ""
+   secure_workload_api_sec = ""
+   secure_workload_api_url = "https://<secure_workload_host>"
+   secure_workload_root_scope = ""
+   ```
+   
+   Go to the `variables.tf` file and uncomment the variable there as well.
+   
+   ```
+   variable "secure_workload_api_key" {}
+   variable "secure_workload_api_sec" {}
+   variable "secure_workload_api_url" {}
+   variable "secure_workload_root_scope" {}
+   ```
+   Run `terraform init` to initialize the provider.
    
    ```
    [devbox Lab_Build]$ terraform init

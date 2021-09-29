@@ -1,5 +1,6 @@
 // Secure Workload Service Account //
 resource "kubernetes_service_account" "tetration-read-only" {
+  depends_on = [kubectl_manifest.config_map_aws_auth]
   metadata {
     name = "tetration.read.only"
     namespace = "default"
@@ -7,6 +8,7 @@ resource "kubernetes_service_account" "tetration-read-only" {
 }
 // Secure Workload ClusterRole //
 resource "kubernetes_cluster_role" "tetration-read-only" {
+  depends_on = [kubernetes_service_account.tetration-read-only]
   metadata {
     name = "tetration.read.only"
   }
@@ -45,6 +47,7 @@ resource "kubernetes_cluster_role" "tetration-read-only" {
 }
 // Secure Workload Clusterrolebinding //
 resource "kubernetes_cluster_role_binding" "tetration-read-only" {
+  depends_on = [kubernetes_cluster_role.tetration-read-only]
   metadata {
     name = "tetration.read.only"
   }

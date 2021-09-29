@@ -3,6 +3,7 @@
 
 // Cluster Scope
 resource "tetration_scope" "scope" {
+  depends_on = [kubectl_manifest.config_map_aws_auth]
   short_name          = local.eks_cluster_name
   short_query_type    = "eq"
   short_query_field   = "user_orchestrator_system/cluster_name"
@@ -12,6 +13,7 @@ resource "tetration_scope" "scope" {
 
 // Yelb App Scope
 resource "tetration_scope" "yelb_app_scope" {
+  depends_on = [tetration_scope.scope]
   short_name          = "Yelb"
   short_query_type    = "eq"
   short_query_field   = "user_orchestrator_system/namespace"
@@ -21,6 +23,7 @@ resource "tetration_scope" "yelb_app_scope" {
 
 // Yelb App Filters
 resource "tetration_filter" "yelb-db-srv" {
+  depends_on = [tetration_scope.yelb_app_scope]
   name         = "${local.eks_cluster_name} Yelb DB Service"
   query        = <<EOF
                     {
@@ -34,6 +37,7 @@ resource "tetration_filter" "yelb-db-srv" {
   public       = false
 }
 resource "tetration_filter" "yelb-db-pod" {
+  depends_on = [tetration_scope.yelb_app_scope]
   name         = "${local.eks_cluster_name} Yelb DB Pod"
   query        = <<EOF
                     {
@@ -47,6 +51,7 @@ resource "tetration_filter" "yelb-db-pod" {
   public       = false
 }
 resource "tetration_filter" "yelb-ui-srv" {
+  depends_on = [tetration_scope.yelb_app_scope]
   name         = "${local.eks_cluster_name} Yelb UI Service"
   query        = <<EOF
                     {
@@ -60,6 +65,7 @@ resource "tetration_filter" "yelb-ui-srv" {
   public       = true
 }
 resource "tetration_filter" "yelb-ui-pod" {
+  depends_on = [tetration_scope.yelb_app_scope]
   name         = "${local.eks_cluster_name} Yelb UI Pod"
   query        = <<EOF
                     {
@@ -73,6 +79,7 @@ resource "tetration_filter" "yelb-ui-pod" {
   public       = true
 }
 resource "tetration_filter" "yelb-app-srv" {
+  depends_on = [tetration_scope.yelb_app_scope]
   name         = "${local.eks_cluster_name} Yelb App Service"
   query        = <<EOF
                     {
@@ -86,6 +93,7 @@ resource "tetration_filter" "yelb-app-srv" {
   public       = false
 }
 resource "tetration_filter" "yelb-app-pod" {
+  depends_on = [tetration_scope.yelb_app_scope]
   name         = "${local.eks_cluster_name} Yelb App Pod"
   query        = <<EOF
                     {
@@ -99,6 +107,7 @@ resource "tetration_filter" "yelb-app-pod" {
   public       = false
 }
 resource "tetration_filter" "yelb-redis-srv" {
+  depends_on = [tetration_scope.yelb_app_scope]
   name         = "${local.eks_cluster_name} Yelb Redis Service"
   query        = <<EOF
                     {
@@ -112,6 +121,7 @@ resource "tetration_filter" "yelb-redis-srv" {
   public       = false
 }
 resource "tetration_filter" "yelb-redis-pod" {
+  depends_on = [tetration_scope.yelb_app_scope]
   name         = "${local.eks_cluster_name} Yelb Redis Pod"
   query        = <<EOF
                     {
@@ -125,6 +135,7 @@ resource "tetration_filter" "yelb-redis-pod" {
   public       = false
 }
 resource "tetration_filter" "any-ipv4" {
+  depends_on = [tetration_scope.yelb_app_scope]
   name         = "${local.eks_cluster_name} Any IPv4"
   query        = <<EOF
                     {
@@ -141,6 +152,7 @@ resource "tetration_filter" "any-ipv4" {
 // Application
 
 resource "tetration_application" "yelb_app" {
+  depends_on = [tetration_scope.yelb_app_scope]
   app_scope_id = tetration_scope.yelb_app_scope.id
   name = "Yelb"
   description = "3-Tier App"

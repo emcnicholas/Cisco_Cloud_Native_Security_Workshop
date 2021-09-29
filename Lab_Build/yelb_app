@@ -2,12 +2,7 @@
 // To apply this file using terraform you must change file name to yelb_app.tf //
 
 resource "kubernetes_namespace" "yelb_ns" {
-  depends_on = [kubectl_manifest.config_map_aws_auth]
   metadata {
-    //uncomment labels to deploy secure cn
-    //labels = {
-    //  istio-injection = "enabled"
-    //}
     name = "yelb"
   }
 }
