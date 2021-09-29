@@ -1292,10 +1292,17 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    ```
    
    We need to get the token for the `tetration.read.only` service account. To do this we need to get the service 
-   account `secrets name` and base64 decode the output of the token. Run the command 
-   `kubectl get serviceaccount -o yaml tetration.read.only` first. Get the name of the secret, for example in this case
-   `tetration.read.only-token-dnlqm`. Run the command 
-   `kubectl get secret <your secret name> --template "{{ .data.token }}" | base64 -d`. This will output the secret token.
+   account `secrets name` and base64 decode the output of the token. 
+   * Run the command 
+   `kubectl get serviceaccount -o yaml tetration.read.only` 
+     
+      Get the name of the secret, for example in this case
+   `tetration.read.only-token-dnlqm`. 
+     
+   * Run the command 
+   `kubectl get secret <your secret name> --template "{{ .data.token }}" | base64 -d`. 
+     
+      This will output the secret token.
 
    ```
    [devbox Lab_Build]$ kubectl get serviceaccount -o yaml tetration.read.only
@@ -1324,16 +1331,21 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    
    ![Secure Workload External Orchestrators](/images/sw-ext-orch-name.png)
 
-   Scroll down to `Auth Token` and paste the `tetration.read.only` token in this field.
+   Scroll down to `Auth Token` and paste the base64 decoded token in this field.
 
    ![Secure Workload External Orchestrators](/images/sw-ext-orch-auth.png)
 
-   Select `Hosts List` and add the hostname of the EKS Cluster API. You can get the hostname of the EKS Cluster API
-   from the AWS Dashboard. Log into your AWS portal and go to **Services** > **Containers** > **Elastic Kubernetes Service**.
-   From this page select **Amazon EKS** and **Clusters**. Select your EKS Cluster name, for example `CNS_Lab_Test`.
-   Select **Confirguration** and under **Details** you will see the `API server endpoint`. 
+   Select `Hosts List` and add the hostname of the EKS Cluster API Endpoint. You can get the hostname from the 
+   Terraform Output. You can always get the Terraform Output by doing a `terraform show`.
    
-   ![AWS EKS API Server Endpoint](/images/sw-k8-api.png)
+   ```
+   Outputs:
+   
+   eks_cluster_api_endpoint = "https://CD3C5AE0C39535356D915B2A9C1A6443.gr7.us-east-2.eks.amazonaws.com"
+   eks_cluster_name = "CNS_Lab_Test"
+   eks_public_ip = "18.190.41.30"
+   ftd_mgmt_ip = "18.190.106.59"
+   ```
 
    Copy the API server endpoint into the Hosts List of the External Orchestrator Configuration page. Make sure to
    delete `https://` from the hostname field. Add `443` as the port number.
@@ -1523,7 +1535,22 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    `terraform apply "tfplan"` to deploy the resources.
    
    Verify the resources by going back into the Secure Workload dashboard. From the menu go to **`Organize`** > 
-   **`Scopes and Inventory`**
+   **`Scopes and Inventory`**. You will now see 2 nested scopes under the root scope, for example in this case the 
+   cluster scope is named `CNS_Lab_Test` and the app scope is named `Yelb`. Under the `Yelb` scope you will see all 
+   the inventory filters. If you click on each inventory filter it will show what resources (pods or services) are 
+   assigned. 
+   
+   ![Secure Workload Scopes](/images/sw-scopes-deployed.png)
+
+   Next, from the menu bar go to **`Defend`** > **`Segmentation`**. You will see a new workspace called `Yelb`. Notice
+   that this workspace is assigned to the nested `CNS_Lab_Test:Yelb` scopes. Click on the Yelb workspace.
+   
+   ![Secure Workload Scopes](/images/sw-ws-yelb.png)
+
+   Select **`Policies`** and **`Absolute policies`** and this will show all the policies that were deployed using the
+   Terraform resources. 
+   
+
    
    
 
