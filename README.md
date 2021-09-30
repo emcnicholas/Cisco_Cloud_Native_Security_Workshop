@@ -1550,11 +1550,9 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    Select **`Policies`** and **`Absolute policies`** and this will show all the policies that were deployed using the
    Terraform resources. 
    
+   ![Secure Workload Policies](/images/sw-ws-policies.png)
+   
 
-   
-   
-
-   
 
 ### Deploy Cisco Secure Cloud Native
 **(OPTIONAL)**

@@ -208,3 +208,79 @@ resource "tetration_application" "yelb_app" {
   }
   catch_all_action = "ALLOW"
 }
+
+// NGINX Resources
+// NGINX App Scope
+resource "tetration_scope" "nginx_app_scope" {
+  depends_on = [tetration_scope.scope]
+  short_name          = "NGINX"
+  short_query_type    = "eq"
+  short_query_field   = "user_orchestrator_system/namespace"
+  short_query_value   = "nginx"
+  parent_app_scope_id = tetration_scope.scope.id
+}
+
+// NGINX App Filters
+resource "tetration_filter" "nginx-srv" {
+  depends_on = [tetration_scope.nginx_app_scope]
+  name         = "${local.eks_cluster_name} NGINX Service"
+  query        = <<EOF
+                    {
+                      "type": "eq",
+                      "field": "user_orchestrator_system/service_name",
+                      "value": "nginx"
+                    }
+          EOF
+  app_scope_id = tetration_scope.nginx_app_scope.id
+  primary      = true
+  public       = true
+}
+resource "tetration_filter" "nginx-pod" {
+  depends_on = [tetration_scope.nginx_app_scope]
+  name         = "${local.eks_cluster_name} NGINX Pod"
+  query        = <<EOF
+                    {
+                      "type": "contains",
+                      "field": "user_orchestrator_system/pod_name",
+                      "value": "nginx"
+                    }
+          EOF
+  app_scope_id = tetration_scope.nginx_app_scope.id
+  primary      = true
+  public       = false
+}
+resource "tetration_filter" "nginx-any-ipv4" {
+  depends_on = [tetration_scope.nginx_app_scope]
+  name         = "${local.eks_cluster_name} NGINX Any IPv4"
+  query        = <<EOF
+                    {
+                      "type": "subnet",
+                      "field": "ip",
+                      "value": "0.0.0.0/0"
+                    }
+          EOF
+  app_scope_id = tetration_scope.nginx_app_scope.id
+  primary      = true
+  public       = true
+
+
+// NGINX Application
+resource "tetration_application" "nginx_app" {
+  depends_on = [tetration_scope.nginx_app_scope]
+  app_scope_id = tetration_scope.nginx_app_scope.id
+  name = "NGINX"
+  description = "Web Server"
+  alternate_query_mode = true
+  strict_validation = true
+  primary = false
+  absolute_policy {
+    consumer_filter_id = tetration_filter.nginx-any-ipv4.id
+    provider_filter_id = tetration_filter.yelb-ui-srv.id
+    action = "ALLOW"
+    layer_4_network_policy {
+      port_range = [80, 80]
+      protocol = 6
+    }
+  }
+  catch_all_action = "ALLOW"
+}
