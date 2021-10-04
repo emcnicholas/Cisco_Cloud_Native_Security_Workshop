@@ -1552,7 +1552,10 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    
    ![Secure Workload Policies](/images/sw-ws-policies.png)
    
-
+Cisco Secure Workload provides a distributed firewall in the Cloud Native environment using a daemonset which  
+securely segments applications while microservices are being spun up. Since the application is being defined using
+kubernetes services and deployments, using Terraform as the IaC tool here allows us to define the policy along with the 
+application and its infrastructure. 
 
 ### Deploy Cisco Secure Cloud Native
 **(OPTIONAL)**
