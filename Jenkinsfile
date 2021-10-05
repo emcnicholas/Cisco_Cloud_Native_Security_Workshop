@@ -19,6 +19,8 @@ pipeline{
         SCA_SERVICE_KEY        = credentials('sca-service-key')
         SW_API_KEY             = credentials('sw-api-key')
         SW_API_SEC             = credentials('sw-api-sec')
+        SW_URL                 = 'https://tet-pov-rtp1.cpoc.co'
+        SW_ROOT_SCOPE          = '605bacee755f027875a0eef3'
     }
     tools {
         terraform 'Terraform 1.0.3'
@@ -41,14 +43,15 @@ pipeline{
                 }
             }
         }
-//         stage('Build DEV Cisco Secure Cloud Native Security'){
-//             steps{
-//                 dir("DEV/Applications"){
-//                     sh 'terraform init'
-//                     sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$DEV_LAB_ID" -var="region=$DEV_AWS_REGION" -var="aws_az1=$DEV_AWS_AZ1" -var="aws_az2=$DEV_AWS_AZ2" -var="sca_service_key=$SCA_SERVICE_KEY" -var="secure_workload_api_key=$SW_API_KEY" -var="secure_workload_api_sec=$SW_API_SEC"'
-//                 }
-//             }
-//         }
+        stage('Build DEV Cisco Secure Cloud Native Security'){
+            steps{
+                dir("DEV/Applications"){
+                    sh 'terraform get'
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$DEV_LAB_ID" -var="region=$DEV_AWS_REGION" -var="aws_az1=$DEV_AWS_AZ1" -var="aws_az2=$DEV_AWS_AZ2" -var="sca_service_key=$SCA_SERVICE_KEY" -var="secure_workload_api_key=$SW_API_KEY" -var="secure_workload_api_sec=$SW_API_SEC" -var="secure_workload_api_url=$SW_URL" -var="secure_workload_root_scope=$SW_ROOT_SCOPE"'
+                }
+            }
+        }
 //         stage('Test DEV Application'){
 //             steps{
 //                 httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://18.217.103.244:30001', validResponseCodes: '200', wrapAsMultipart: false
