@@ -36,7 +36,7 @@ pipeline{
         stage('Build DEV Infrastructure'){
             steps{
                 dir("DEV/Infrastructure"){
-                    sh 'terraform get'
+                    sh 'terraform get -update'
                     sh 'terraform init'
                     sh 'terraform apply -auto-approve \
                     -var="aws_access_key=$AWS_ACCESS_KEY_ID" \
@@ -54,7 +54,7 @@ pipeline{
         stage('Build DEV Cisco Secure Cloud Native Security'){
             steps{
                 dir("DEV/Applications"){
-                    sh 'terraform get'
+                    sh 'terraform get -update'
                     sh 'terraform init'
                     sh 'terraform apply -auto-approve \
                     -var="aws_access_key=$AWS_ACCESS_KEY_ID" \
