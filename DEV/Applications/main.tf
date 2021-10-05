@@ -67,7 +67,7 @@ provider "tetration" {
   api_key = var.secure_workload_api_key
   api_secret = var.secure_workload_api_sec
   api_url = var.secure_workload_api_url
-  disable_tls_verification = false
+  disable_tls_verification = true
 }
 
 module "Applications" {
