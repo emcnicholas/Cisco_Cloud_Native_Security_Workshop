@@ -1795,7 +1795,12 @@ Plan: 1 to add, 0 to change, 0 to destroy.
 ```
 
 
-### Deploy Test Applications
-In part 1 we will be deploying our applications
+## Part 2
+**(OPTIONAL)**
+
+### Integrating IaC into a Continuous Deployment Pipeline
+In this section we will use Jenkins as our CI/CD tool to integrate our Infrastructure as Code into the
+pipeline. 
+
 
  
