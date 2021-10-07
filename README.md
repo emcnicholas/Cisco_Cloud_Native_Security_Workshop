@@ -1557,7 +1557,31 @@ securely segments applications while microservices are being spun up. Since the 
 kubernetes services and deployments, using Terraform as the IaC tool here allows us to define the policy along with the 
 application and its infrastructure. 
 
-### Deploy Cisco Secure Cloud Native
+## Part 2
+**(OPTIONAL)**
+
+### Integrating IaC into a Continuous Deployment Pipeline
+In this section we will use Jenkins as our CI/CD tool to integrate our Infrastructure using **Pipeline as Code**.  
+
+
+[Pipeline as Code](https://www.jenkins.io/doc/book/pipeline-as-code/) describes a set of features that allow Jenkins 
+users to define pipelined job processes with code, 
+stored and versioned in a source repository. These features allow Jenkins to discover, manage, and run jobs for multiple 
+source repositories and branches - eliminating the need for manual job creation and management.
+
+To use Pipeline as Code, projects must contain a file named Jenkinsfile in the repository root, which contains a 
+"Pipeline script." Here is a look at our 
+[Jenkinsfile](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Jenkinsfile).
+
+We will go through the 
+
+
+
+
+
+
+
+### Deploy Cisco Secure CN
 **(OPTIONAL)**
 
 :warning: **You will need a Cisco Secure Cloud Native account to complete this section**.
@@ -1582,7 +1606,7 @@ Secret Key. Save the keys somewhere safe.
    ![Secure Cloud Native Token](/images/cn-token.png)
 
 5. Create a Deployment for the EKS cluster. Select Deployments > Clusters. Click New Cluster. Cluster Name should be the 
-name of the EKS Cluster (ex: CNS_Lab_55). Orchestration will be Amazon Elastic Kubernetes Service. Keep all the defaults
+name of the EKS Cluster (ex: CNS_Lab_Test). Orchestration will be Amazon Elastic Kubernetes Service. Keep all the defaults
 for options below and click Next.
 
    ![Secure Cloud Native Cluster](/images/cn-cluster.png)
@@ -1795,12 +1819,7 @@ Plan: 1 to add, 0 to change, 0 to destroy.
 ```
 
 
-## Part 2
-**(OPTIONAL)**
 
-### Integrating IaC into a Continuous Deployment Pipeline
-In this section we will use Jenkins as our CI/CD tool to integrate our Infrastructure as Code into the
-pipeline. 
 
 
  
