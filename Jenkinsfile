@@ -71,28 +71,46 @@ pipeline{
                 }
             }
         }
-//         stage('Test DEV Application'){
-//             steps{
-//                 httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://18.217.103.244:30001', validResponseCodes: '200', wrapAsMultipart: false
-//             }
-//         }
-//         stage('Deploy PROD Infrastructure'){
-//             steps{
-//                 dir("PROD/Infrastructure"){
-//                     sh 'terraform init'
-//                     sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$PROD_LAB_ID" -var="region=$PROD_AWS_REGION" -var="aws_az1=$PROD_AWS_AZ1" -var="aws_az2=$PROD_AWS_AZ2" -var="ftd_pass=$FTD_PASSWORD" -var="key_name=ftd_key"'
-//                     //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
-//                 }
-//             }
-//         }
-//         stage('Deploy PROD Cisco Secure Cloud Native Security'){
-//             steps{
-//                 dir("PROD/Applications"){
-//                     sh 'terraform init'
-//                     sh 'terraform apply -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$PROD_LAB_ID" -var="region=$PROD_AWS_REGION" -var="aws_az1=$PROD_AWS_AZ1" -var="aws_az2=$PROD_AWS_AZ2" -var="sca_service_key=$SCA_SERVICE_KEY" -var="secure_workload_api_key=$SW_API_KEY" -var="secure_workload_api_sec=$SW_API_SEC"'
-//                 }
-//             }
-//         }
+        stage('Test DEV Application'){
+            steps{
+                httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://18.218.140.135:30001', validResponseCodes: '200', wrapAsMultipart: false
+            }
+        }
+        stage('Deploy PROD Infrastructure'){
+            steps{
+                dir("PROD/Infrastructure"){
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve \
+                    -var="aws_access_key=$AWS_ACCESS_KEY_ID" \
+                    -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" \
+                    -var="lab_id=$PROD_LAB_ID" \
+                    -var="region=$PROD_AWS_REGION" \
+                    -var="aws_az1=$PROD_AWS_AZ1" \
+                    -var="aws_az2=$PROD_AWS_AZ2"
+                    -var="ftd_pass=$FTD_PASSWORD" -var="key_name=ftd_key"'
+                    //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
+                }
+            }
+        }
+        stage('Deploy PROD Cisco Secure Cloud Native Security'){
+            steps{
+                dir("PROD/Applications"){
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve \
+                    -var="aws_access_key=$AWS_ACCESS_KEY_ID" \
+                    -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" \
+                    -var="lab_id=$PROD_LAB_ID" \
+                    -var="region=$PROD_AWS_REGION" \
+                    -var="aws_az1=$PROD_AWS_AZ1" \
+                    -var="aws_az2=$PROD_AWS_AZ2" \
+                    -var="sca_service_key=$SCA_SERVICE_KEY" \
+                    -var="secure_workload_api_key=$SW_API_KEY" \
+                    -var="secure_workload_api_sec=$SW_API_SEC" \
+                    -var="secure_workload_api_url=$SW_URL" \
+                    -var="secure_workload_root_scope=$SW_ROOT_SCOPE"'
+                }
+            }
+        }
 //         stage('Test PROD Application'){
 //             steps{
 //                 httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://52.44.87.40:30001', validResponseCodes: '200', wrapAsMultipart: false
