@@ -1622,7 +1622,7 @@ or any other version of Docker.
    ![Jenkins Manage Credentials](/images/jenk-creds.png)
 
 8. Add the following credentials as **Secret Text** (refer to 
-   [Using Credentials](https://www.jenkins.io/doc/book/using/using-credentials/) on how to Secret Text credentials):
+   [Using Credentials](https://www.jenkins.io/doc/book/using/using-credentials/) on how to create Secret Text credentials):
    * AWS Access Key
    * AWS Secret Key
    * Github Token
@@ -1632,6 +1632,82 @@ or any other version of Docker.
    * (Optional) Secure Workload API Secret
    
    ![Jenkins Manage Credentials](/images/jenk-creds-tokens.png)
+
+9. Go back to **`Manage Jenkins`** and select **`Manage Plugins`**.
+   
+   ![Jenkins Manage Plugins](/images/jenk-plugins.png)
+
+   Here we are going to add plugins for **`Terraform`** and **`Docker`**. In the search bar search for Terraform. You
+   will see a plugin named **`Terraform Plugin`**. Select the install checkbox and click **`Install without restart`**.
+   Do the same for **`Docker`**. In the search bar search for Docker. You
+   will see a plugin named **`Docker Pipeline`**. Select the install checkbox and click **`Install without restart`**.
+   
+10. Go back to **`Manage Jenkins`** and select **`Global Tool Configuration`**. Scroll down to **`Docker`**. Select 
+   **`Add Docker`**. Give it name and select **`Install automatically`**. Under **`Download from docker.com`** use 
+    Docker version **`latest`**.
+    
+   ![Jenkins Docker Plugin](/images/jenk-docker.png)
+
+11. Scroll down to **`Terraform`**. Select 
+   **`Add Terraform`**. Give it name and select **`Install automatically`**. Under **`Install from bintray.com`** 
+    select the version of Terraform and system type it will be running on. For example, here Terraform will be running
+    on a linux amd64 host.
+    
+   ![Jenkins Terraform Plugin](/images/jenk-terraform.png)
+
+   Click **`Apply`** and **`Save`**.
+   
+
+12. Now that the pipeline, credentials and plugins are configured in Jenkins, let's run through the 
+   [Jenkinsfile](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Jenkinsfile) and pick
+   it apart. The first part of the **`Jenkinsfile`** is to declare the Jenkinsfile as a `pipeline` and the default 
+   agent we will be using. The agent directive, which is required, instructs Jenkins to allocate an executor and 
+   workspace for the Pipeline. Without an agent directive, not only is the Declarative Pipeline not valid, it would not 
+   be capable of doing any work! By default the agent directive ensures that the source repository is checked out and 
+   made available for steps in the subsequent stages. In this case we are using `agent any`, which will use any agent
+   available. Because we are using the Jenkins on Docker deployment, the agent used will actually be a docker container.
+   Next we set the `environment` variables. This is where we set all the variables needed for our deployment. We will
+   pass these variables to our stages in the following steps. Notice the `credentials()` variables. This is where we 
+   reference the secure variables we created in the Jenkins Credentials manager in the previous step. Also note that we
+   have some variables defined for **`Prod`** and **`Dev`**. I'm pretty sure you can guess what they will be used for.
+   
+   
+   ```
+   pipeline{
+       agent any
+       environment {
+           LAB_NAME               = 'CNS_Lab'
+           DEV_LAB_ID             = 'Dev'
+           PROD_LAB_ID            = 'Prod'
+           AWS_ACCESS_KEY_ID      = credentials('aws-access-key')
+           AWS_SECRET_ACCESS_KEY  = credentials('aws-secret-key')
+           DEV_AWS_REGION         = 'us-east-2'
+           PROD_AWS_REGION        = 'us-east-1'
+           DEV_AWS_AZ1            = 'us-east-2a'
+           DEV_AWS_AZ2            = 'us-east-2b'
+           PROD_AWS_AZ1           = 'us-east-1a'
+           PROD_AWS_AZ2           = 'us-east-1b'
+           GITHUB_TOKEN           = credentials('github_token')
+           FTD_PASSWORD           = credentials('ftd-password')
+           SCA_SERVICE_KEY        = credentials('sca-service-key')
+           SW_API_KEY             = credentials('sw-api-key')
+           SW_API_SEC             = credentials('sw-api-sec')
+           SW_URL                 = 'https://<hostname>'
+           SW_ROOT_SCOPE          = '<root scope  id>'
+       }
+   ```
+
+13. Next we add the tools we configured in the previous steps.
+
+   ```
+       }
+       tools {
+           terraform 'Terraform 1.0.3'
+           dockerTool 'Docker'
+       }
+   ```
+
+14. Then we start building out our stages. 
    
 
 

@@ -4,7 +4,7 @@ pipeline{
     agent any
     environment {
         LAB_NAME               = 'CNS_Lab'
-        DEV_LAB_ID             = 'Ed'
+        DEV_LAB_ID             = 'Dev'
         PROD_LAB_ID            = 'Prod'
         AWS_ACCESS_KEY_ID      = credentials('aws-access-key')
         AWS_SECRET_ACCESS_KEY  = credentials('aws-secret-key')
@@ -19,8 +19,10 @@ pipeline{
         SCA_SERVICE_KEY        = credentials('sca-service-key')
         SW_API_KEY             = credentials('sw-api-key')
         SW_API_SEC             = credentials('sw-api-sec')
-        SW_URL                 = 'https://tet-pov-rtp1.cpoc.co'
-        SW_ROOT_SCOPE          = '605bacee755f027875a0eef3'
+        SW_URL                 = 'https://<hostname>'
+        SW_ROOT_SCOPE          = '<root scope id>'
+        DEV_EKS_HOST           = '<dev eks host ip>'
+        PROD_EKS_HOST          = '<dev eks host ip>'
     }
     tools {
         terraform 'Terraform 1.0.3'
@@ -33,24 +35,25 @@ pipeline{
                 git branch: 'main', url: 'https://$GITHUB_TOKEN@github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
             }
         }
-//         stage('Build DEV Infrastructure'){
-//             steps{
-//                 dir("DEV/Infrastructure"){
-//                     sh 'terraform get -update'
-//                     sh 'terraform init'
-//                     sh 'terraform apply -auto-approve \
-//                     -var="aws_access_key=$AWS_ACCESS_KEY_ID" \
-//                     -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" \
-//                     -var="lab_id=$DEV_LAB_ID" \
-//                     -var="region=$DEV_AWS_REGION" \
-//                     -var="aws_az1=$DEV_AWS_AZ1" \
-//                     -var="aws_az2=$DEV_AWS_AZ2" \
-//                     -var="ftd_pass=$FTD_PASSWORD" \
-//                     -var="key_name=ftd_key"'
-//                     //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
-//                 }
-//             }
-//         }
+        stage('Build DEV Infrastructure'){
+            steps{
+                dir("DEV/Infrastructure"){
+                    sh 'terraform get -update'
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve \
+                    -var="aws_access_key=$AWS_ACCESS_KEY_ID" \
+                    -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" \
+                    -var="lab_id=$DEV_LAB_ID" \
+                    -var="region=$DEV_AWS_REGION" \
+                    -var="aws_az1=$DEV_AWS_AZ1" \
+                    -var="aws_az2=$DEV_AWS_AZ2" \
+                    -var="ftd_pass=$FTD_PASSWORD" \
+                    -var="key_name=ftd_key"'
+                    //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
+                }
+            }
+        }
+// Uncomment if you are deploying Secure Cloud Analytics or Secure Workload
 //         stage('Build DEV Cisco Secure Cloud Native Security'){
 //             steps{
 //                 dir("DEV/Applications"){
@@ -71,11 +74,11 @@ pipeline{
 //                 }
 //             }
 //         }
-//         stage('Test DEV Application'){
-//             steps{
-//                 httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://18.218.140.135:30001', validResponseCodes: '200', wrapAsMultipart: false
-//             }
-//         }
+        stage('Test DEV Application'){
+            steps{
+                httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://:30001', validResponseCodes: '200', wrapAsMultipart: false
+            }
+        }
 //         stage('Deploy PROD Infrastructure'){
 //             steps{
 //                 dir("PROD/Infrastructure"){
