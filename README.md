@@ -1573,18 +1573,4 @@ To use Pipeline as Code, projects must contain a file named Jenkinsfile in the r
 "Pipeline script." Here is a look at our 
 [Jenkinsfile](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Jenkinsfile).
 
-We will go through the 
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
+We will go through th
