@@ -1573,4 +1573,66 @@ To use Pipeline as Code, projects must contain a file named Jenkinsfile in the r
 "Pipeline script." Here is a look at our 
 [Jenkinsfile](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Jenkinsfile).
 
-We will go through th
+We will go through each stage of this Jenkinsfile in detail later in this section, but first lets get started setting 
+up the Jenkins. This section assumes you already have Jenkins up and running in your environment. If you don't have
+a Jenkins instance, you can go to [Installing Jenkins](https://www.jenkins.io/doc/book/installing/) for a bunch of 
+install options. For this lab we used the [Docker](https://www.jenkins.io/doc/book/installing/docker/) install as we 
+felt it was the easiest way to get up and running. You can run this on [Docker Desktop](https://docs.docker.com/desktop/) 
+or any other version of Docker.
+
+1. First let's fork the 
+   [Cisco Cloud Native Security Workshop](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop) Github
+   repository. Go to the repo and click **`Fork`**. This will allow you to fork the repo to your Github account. For
+   more info on how to fork a repo go to [Fork a Repo](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
+   on Github docs.
+
+2. Go to the Jenkins home page and select **`New Item`**.
+
+   ![Jenkins Home](/images/jenk-home.png)
+
+3. Enter the name of the pipeline job and select **`Pipeline`**.
+
+   ![Jenkins Item](/images/jenk-new-item.png)
+
+4. Select **`Configuration`**. This will bring you to the configuration page. Give the project a description.
+
+   ![Jenkins Configuration](/images/jenk-conf.png)
+
+5. Scroll down to Pipeline, under the **Definition** dropdown select **`Pipeline script from SCM`**. Under **SCM** 
+   select **`Git`**. Under **Repository URL** add **Your Forked Repo** URL. Under **Credentials** add your Github 
+   credentials. If you don't know how to add your creds to Jenkins go to 
+   [Using Credentials](https://www.jenkins.io/doc/book/using/using-credentials/) on the *Using Jenkins* documentation.
+   
+   ![Jenkins Pipeline Configuration](/images/jenk-pipeline.png)
+
+6. Scroll down to **Branches to build** and under **Branch Specifier** change **`*/master`** to **`*/main`**. Under
+   **Script Path** add **`Jenkinsfile`**. Select **Apply** and **Save**.
+   
+   ![Jenkins Pipeline Configuration](/images/jenk-branch.png)
+
+7. Next we need to setup all the credentials in Jenkins so we can pass them to the Jenkinsfile securely using 
+   environment variables. Remember in Part 1 of this lab we used the `terraform.tfvars` file to pass these credentials
+   to our Terraform modules. Well that works in development when we are testing and building our Terraform code, but 
+   that won't work when we are using CI/CD to continously deploy and update our infrastructure. First thing to note is 
+   we don't want to save our credentials to a file in SCM. Second, we don't want our variables to be static. For
+   example, we may want to change regions or availability zones depending on where we want to deploy.
+   
+   From the Jenkins Daskboard go to **Manage Jenkins** then **Manage Credentials**.
+
+   ![Jenkins Manage Credentials](/images/jenk-creds.png)
+
+8. Add the following credentials as **Secret Text** (refer to 
+   [Using Credentials](https://www.jenkins.io/doc/book/using/using-credentials/) on how to Secret Text credentials):
+   * AWS Access Key
+   * AWS Secret Key
+   * Github Token
+   * FTD Password
+   * (Optional) Secure Cloud Analytics Service Key
+   * (Optional) Secure Workload API Key
+   * (Optional) Secure Workload API Secret
+   
+   ![Jenkins Manage Credentials](/images/jenk-creds-tokens.png)
+   
+
+
+
