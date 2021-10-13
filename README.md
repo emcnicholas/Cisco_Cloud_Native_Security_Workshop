@@ -1744,8 +1744,38 @@ or any other version of Docker.
      }
    ```
 
-   If you actaully take a look in the [DEV/Infrastructure]()
+   If you take a look in the 
+   [DEV/Infrastructure](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/tree/main/DEV/Infrastructure)
+   directory you will only see **`main.tf`** and **`variables.tf`** files. Where is all the other code we used in the
+   Lab_Build directory? Well let's take a look at the 
+   [main.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/DEV/Infrastructure/main.tf)
+   file. Because we will be using the same infrastructure code in the Dev and Prod environments, we have built a 
+   module. Think of a module like a function, which is repeatable code we can use over and over again. If we need to
+   make changes to the module, it would make changes to both the Dev and Prod environments, which is what we want.
+
+   ```
+   module "Infrastructure" {
+     source = "github.com/emcnicholas/Cisco_Cloud_Native_Security_Infrastructure"
+     aws_access_key = var.aws_access_key
+     aws_secret_key = var.aws_secret_key
+     region         = var.region
+     ftd_user       = var.ftd_user
+     ftd_pass       = var.ftd_pass
+     lab_id         = var.lab_id
+     aws_az1        = var.aws_az1
+     aws_az2        = var.aws_az2
+     key_name       = var.key_name
+     remote_hosts   = [""] //ex:["172.16.1.1", "192.168.2.2"]
+   }
+   ```
    
+   As you can see from **`source = "github.com/emcnicholas/Cisco_Cloud_Native_Security_Infrastructure"`** we are getting
+   the module code from GitHub. You can access this repo at 
+   [Cisco Cloud Native Security Infrastructure](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Infrastructure)
+   
+   In this repo you will see most of the files and code we built in Part 1. 
+
+   ![Cisco Secure Cloud Native Infrastructure](/images/github-infra.png)
 
 
 
