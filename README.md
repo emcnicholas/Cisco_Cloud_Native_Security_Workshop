@@ -1707,7 +1707,44 @@ or any other version of Docker.
        }
    ```
 
-14. Then we start building out our stages. 
+14. Then we start building out our stages. The first stage is to checkout the repository. As you can see below we are
+   checking out the Cisco Cloud Native Security Workshop repo. When running this live you should use your forked repo.
+    Also notice we are using the **`$GITHUB_TOKEN`** environment variable.
+
+   ```
+   stages{
+       stage('SCM Checkout'){
+           steps{
+               git branch: 'main', url: 'https://$GITHUB_TOKEN@github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
+           }
+   ```
+
+15. The next stage is used to build the Dev Infrastructure environment. You see that we are running the terraform
+   commands from the **`DEV/Infrastructure`** directory. You also see that we are using the **DEV** environment
+    variables for the Lab ID, AWS region and availability zones. 
+
+   ```
+     stage('Build DEV Infrastructure'){
+         steps{
+             dir("DEV/Infrastructure"){
+                 sh 'terraform get -update'
+                 sh 'terraform init'
+                 sh 'terraform apply -auto-approve \
+                 -var="aws_access_key=$AWS_ACCESS_KEY_ID" \
+                 -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" \
+                 -var="lab_id=$DEV_LAB_ID" \
+                 -var="region=$DEV_AWS_REGION" \
+                 -var="aws_az1=$DEV_AWS_AZ1" \
+                 -var="aws_az2=$DEV_AWS_AZ2" \
+                 -var="ftd_pass=$FTD_PASSWORD" \
+                 -var="key_name=ftd_key"'
+                 //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
+             }
+         }
+     }
+   ```
+
+   If you actaully take a look in the [DEV/Infrastructure]()
    
 
 
