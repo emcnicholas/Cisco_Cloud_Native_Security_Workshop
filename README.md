@@ -1708,7 +1708,7 @@ or any other version of Docker.
    ```
 
 14. Then we start building out our stages. The first stage is to checkout the repository. As you can see below we are
-   checking out the Cisco Cloud Native Security Workshop repo. When running this live you should use your forked repo.
+    checking out the Cisco Cloud Native Security Workshop repo. When running this live you should use your forked repo.
     Also notice we are using the **`$GITHUB_TOKEN`** environment variable.
 
    ```
@@ -1721,7 +1721,7 @@ or any other version of Docker.
 
 15. The next stage is used to build the Dev Infrastructure environment, which is the VPC, EKS and FTDv
     You see that we are running terraform
-   from the **`DEV/Infrastructure`** directory. You also see that we are using the **DEV** environment
+    from the **`DEV/Infrastructure`** directory. You also see that we are using the **DEV** environment
     variables for the Lab ID, AWS region and availability zones. 
 
    ```
@@ -1778,8 +1778,8 @@ or any other version of Docker.
 
    ![Cisco Secure Cloud Native Infrastructure](/images/github-infra.png)
 
-16. For next stage we build the applications, which is Yelb, NGINX, Cisco Secure Cloud Analytics and Secure Workload.
-   We do the same thing here as we did with the Dev Infrastructure. We run Terraform from the **`DEV/Applications`**
+16. For the next stage we build the applications, which is Yelb, NGINX, Cisco Secure Cloud Analytics and Secure Workload.
+    We do the same thing here as we did with the Dev Infrastructure. We run Terraform from the **`DEV/Applications`**
     directory. You see that we added some variables for the Cisco Secure APIs.
 
    ```
@@ -1829,3 +1829,63 @@ or any other version of Docker.
 
    ![Cisco Secure Cloud Native Applications](/images/github-appl.png)
 
+17. Then we create a stage to test the applications, in this case we are testing the Yelb app. This is a super simple
+    test where we are just going to do a http get request to the Yelb UI. We obviously should use more in-depth 
+    unit, load, integration and regression testing for a real pipeline, but we're just labin it up here.
+    
+   ```
+   stage('Test DEV Application'){
+      steps{
+          httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://$DEV_EKS_HOST:30001', validResponseCodes: '200', wrapAsMultipart: false
+      }
+   }
+   ```
+
+18. So far the Jenkinsfile stages were to deploy the Dev environment. After our testing is complete and successful
+    we can deploy our Production environment. We will use the same exact code and modules that we did in the Dev build,
+    except we will pass Prod variables using the Jenkins environment variables.
+    
+   ```
+           stage('Deploy PROD Infrastructure'){
+               steps{
+                   dir("PROD/Infrastructure"){
+                       sh 'terraform init'
+                       sh 'terraform apply -auto-approve \
+                       -var="aws_access_key=$AWS_ACCESS_KEY_ID" \
+                       -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" \
+                       -var="lab_id=$PROD_LAB_ID" \
+                       -var="region=$PROD_AWS_REGION" \
+                       -var="aws_az1=$PROD_AWS_AZ1" \
+                       -var="aws_az2=$PROD_AWS_AZ2" \
+                       -var="ftd_pass=$FTD_PASSWORD" -var="key_name=ftd_key"'
+                       //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
+                   }
+               }
+           }
+   // Comment out if you are NOT deploying Secure Cloud Analytics or Secure Workload
+           stage('Deploy PROD Cisco Secure Cloud Native Security'){
+               steps{
+                   dir("PROD/Applications"){
+                       sh 'terraform init'
+                       sh 'terraform apply -auto-approve \
+                       -var="aws_access_key=$AWS_ACCESS_KEY_ID" \
+                       -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" \
+                       -var="lab_id=$PROD_LAB_ID" \
+                       -var="region=$PROD_AWS_REGION" \
+                       -var="aws_az1=$PROD_AWS_AZ1" \
+                       -var="aws_az2=$PROD_AWS_AZ2" \
+                       -var="sca_service_key=$SCA_SERVICE_KEY" \
+                       -var="secure_workload_api_key=$SW_API_KEY" \
+                       -var="secure_workload_api_sec=$SW_API_SEC" \
+                       -var="secure_workload_api_url=$SW_URL" \
+                       -var="secure_workload_root_scope=$SW_ROOT_SCOPE"'
+                   }
+               }
+           }
+           stage('Test PROD Application'){
+               steps{
+                   httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://$PROD_EKS_HOST:30001', validResponseCodes: '200', wrapAsMultipart: false
+               }
+           }
+   ```
+    
