@@ -1719,8 +1719,9 @@ or any other version of Docker.
            }
    ```
 
-15. The next stage is used to build the Dev Infrastructure environment. You see that we are running the terraform
-   commands from the **`DEV/Infrastructure`** directory. You also see that we are using the **DEV** environment
+15. The next stage is used to build the Dev Infrastructure environment, which is the VPC, EKS and FTDv
+    You see that we are running terraform
+   from the **`DEV/Infrastructure`** directory. You also see that we are using the **DEV** environment
     variables for the Lab ID, AWS region and availability zones. 
 
    ```
@@ -1777,5 +1778,54 @@ or any other version of Docker.
 
    ![Cisco Secure Cloud Native Infrastructure](/images/github-infra.png)
 
+16. For next stage we build the applications, which is Yelb, NGINX, Cisco Secure Cloud Analytics and Secure Workload.
+   We do the same thing here as we did with the Dev Infrastructure. We run Terraform from the **`DEV/Applications`**
+    directory. You see that we added some variables for the Cisco Secure APIs.
 
+   ```
+   stage('Build DEV Cisco Secure Cloud Native Security'){
+      steps{
+          dir("DEV/Applications"){
+              sh 'terraform get -update'
+              sh 'terraform init'
+              sh 'terraform apply -auto-approve \
+              -var="aws_access_key=$AWS_ACCESS_KEY_ID" \
+              -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" \
+              -var="lab_id=$DEV_LAB_ID" \
+              -var="region=$DEV_AWS_REGION" \
+              -var="aws_az1=$DEV_AWS_AZ1" \
+              -var="aws_az2=$DEV_AWS_AZ2" \
+              -var="sca_service_key=$SCA_SERVICE_KEY" \
+              -var="secure_workload_api_key=$SW_API_KEY" \
+              -var="secure_workload_api_sec=$SW_API_SEC" \
+              -var="secure_workload_api_url=$SW_URL" \
+              -var="secure_workload_root_scope=$SW_ROOT_SCOPE"'
+          }
+      }
+   }
+   ```
+
+   If you take a look at the **`main.tf`** file we use a module for the applications as well.
+
+   ```
+   module "Applications" {
+     source = "github.com/emcnicholas/Cisco_Cloud_Native_Security_Applications"
+     aws_access_key             = var.aws_access_key
+     aws_secret_key             = var.aws_secret_key
+     region                     = var.region
+     lab_id                     = var.lab_id
+     aws_az1                    = var.aws_az1
+     aws_az2                    = var.aws_az2
+     sca_service_key            = var.sca_service_key
+     secure_workload_api_key    = var.secure_workload_api_key
+     secure_workload_api_sec    = var.secure_workload_api_sec
+     secure_workload_api_url    = var.secure_workload_api_url
+     secure_workload_root_scope = var.secure_workload_root_scope
+   }
+   ```
+
+   This module is available at 
+   [Cisco Cloud Native Security Applications](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Applications).
+
+   ![Cisco Secure Cloud Native Applications](/images/github-appl.png)
 
