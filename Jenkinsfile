@@ -15,13 +15,13 @@ pipeline{
         PROD_AWS_AZ1           = 'us-east-1a'
         PROD_AWS_AZ2           = 'us-east-1b'
         GITHUB_TOKEN           = credentials('github_token')
-        GITHUB_REPO            = '<github repo>' //ex: github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
+        GITHUB_REPO            = 'github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git' //ex: github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
         FTD_PASSWORD           = credentials('ftd-password')
         SCA_SERVICE_KEY        = credentials('sca-service-key')
         SW_API_KEY             = credentials('sw-api-key')
         SW_API_SEC             = credentials('sw-api-sec')
-        SW_URL                 = 'https://<hostname>'
-        SW_ROOT_SCOPE          = '<root scope id>'
+        SW_URL                 = 'https://tet-pov-rtp1.cpoc.co'
+        SW_ROOT_SCOPE          = '605bacee755f027875a0eef3'
         DEV_EKS_HOST           = '<dev eks host ip>'
         PROD_EKS_HOST          = '<prod eks host ip>'
     }
