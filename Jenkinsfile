@@ -15,6 +15,7 @@ pipeline{
         PROD_AWS_AZ1           = 'us-east-1a'
         PROD_AWS_AZ2           = 'us-east-1b'
         GITHUB_TOKEN           = credentials('github_token')
+        GITHUB_REPO            = '<github repo>' //ex: github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
         FTD_PASSWORD           = credentials('ftd-password')
         SCA_SERVICE_KEY        = credentials('sca-service-key')
         SW_API_KEY             = credentials('sw-api-key')
@@ -22,7 +23,7 @@ pipeline{
         SW_URL                 = 'https://<hostname>'
         SW_ROOT_SCOPE          = '<root scope id>'
         DEV_EKS_HOST           = '<dev eks host ip>'
-        PROD_EKS_HOST          = '<dev eks host ip>'
+        PROD_EKS_HOST          = '<prod eks host ip>'
     }
     tools {
         terraform 'Terraform 1.0.3'
@@ -32,7 +33,7 @@ pipeline{
     stages{
         stage('SCM Checkout'){
             steps{
-                git branch: 'main', url: 'https://$GITHUB_TOKEN@github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
+                git branch: 'main', url: 'https://$GITHUB_TOKEN@$GITHUB_REPO'
             }
         }
         stage('Build DEV Infrastructure'){
@@ -90,7 +91,8 @@ pipeline{
                     -var="region=$PROD_AWS_REGION" \
                     -var="aws_az1=$PROD_AWS_AZ1" \
                     -var="aws_az2=$PROD_AWS_AZ2" \
-                    -var="ftd_pass=$FTD_PASSWORD" -var="key_name=ftd_key"'
+                    -var="ftd_pass=$FTD_PASSWORD" \
+                    -var="key_name=ftd_key"'
                     //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
                 }
             }
