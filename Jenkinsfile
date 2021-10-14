@@ -123,7 +123,9 @@ pipeline{
             }
         }
 
-// !!!CAUTION!!! Terraform Destroy Stages for Testing - Only uncomment to destroy everything
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CAUTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+// Terraform Destroy Stages for Testing - Only uncomment to destroy everything
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // Destroy Infrastructure
 //         stage('Destroy DEV Cisco Secure Cloud Native Security'){
 //             steps{
