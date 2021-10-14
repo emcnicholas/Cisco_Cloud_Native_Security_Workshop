@@ -15,7 +15,7 @@ pipeline{
         PROD_AWS_AZ1           = 'us-east-1a'
         PROD_AWS_AZ2           = 'us-east-1b'
         GITHUB_TOKEN           = credentials('github_token')
-        GITHUB_REPO            = 'emcnicholas/Cisco_Cloud_Native_Security_Workshop.git' //ex: github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
+        MY_REPO                = 'emcnicholas/Cisco_Cloud_Native_Security_Workshop.git' //ex: github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
         FTD_PASSWORD           = credentials('ftd-password')
         SCA_SERVICE_KEY        = credentials('sca-service-key')
         SW_API_KEY             = credentials('sw-api-key')
@@ -33,7 +33,7 @@ pipeline{
     stages{
         stage('SCM Checkout'){
             steps{
-                git branch: 'main', url: 'https://$GITHUB_TOKEN@github.com/$GITHUB_REPO'
+                git branch: 'main', url: 'https://$GITHUB_TOKEN@github.com/$MY_REPO'
             }
         }
         stage('Build DEV Infrastructure'){
