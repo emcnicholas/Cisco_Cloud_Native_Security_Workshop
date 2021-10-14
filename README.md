@@ -1674,14 +1674,14 @@ or any other version of Docker.
    reference the secure variables we created in the Jenkins Credentials manager in the previous step. Also note that we
    have some variables defined for **`Prod`** and **`Dev`**. I'm pretty sure you can guess what they will be used for. 
     
-      There are some additional variables needed for our pipeline to work correctly. 
-      * **`GITHUB_REPO`** Add your forked repo here
+      There are some additional variables needed for our pipeline to work correctly.
       * **`SW_URL`** Add the hostname of your Secure Workload instance
       * **`SW_ROOT_SCOPE`** Add the Secure Workload Root Scope ID
       * **`DEV_EKS_HOST`** This is the public IP address of the Dev EKS Worker Node. We will get this from the DEV 
          Infrastructure build.
       * **`PROD_EKS_HOST`** This is the public IP address of the Prod EKS Worker Node. We will get this from the Prod 
          Infrastructure build.
+      * **`REMOTE_HOSTS`** These are the IP addresses that will be permitted access to the FTD Mgmt and EKS APIs
         
       Once variables are added make sure to do a `git commit` and `git push` to update your forked repo.
    
@@ -1701,7 +1701,6 @@ or any other version of Docker.
         PROD_AWS_AZ1           = 'us-east-1a'
         PROD_AWS_AZ2           = 'us-east-1b'
         GITHUB_TOKEN           = credentials('github_token')
-        GITHUB_REPO            = '<github repo>' //ex: github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
         FTD_PASSWORD           = credentials('ftd-password')
         SCA_SERVICE_KEY        = credentials('sca-service-key')
         SW_API_KEY             = credentials('sw-api-key')
@@ -1710,6 +1709,7 @@ or any other version of Docker.
         SW_ROOT_SCOPE          = '<root scope id>'
         DEV_EKS_HOST           = '<dev eks host ip>'
         PROD_EKS_HOST          = '<prod eks host ip>'
+        REMOTE_HOSTS           = '[""]' //ex: ["172.16.1.1", "192.168.2.2"]
     }
    ```
 
@@ -1860,7 +1860,7 @@ or any other version of Docker.
 18. So far the Jenkinsfile stages were to deploy the Dev environment. After our testing is complete and successful
     we can deploy our Production environment. We will use the same exact code and modules that we did in the Dev build,
     except we will pass Prod variables using the Jenkins environment variables. Below you see that we are running
-    Terraform from **`PROD/Infrastructure`** and **`PROD/Applications`** directories. We are deploying to 
+    Terraform from **`PROD/Infrastructure`** and **`PROD/Applications`** directories. 
     
    ```
            stage('Deploy PROD Infrastructure'){
@@ -1905,4 +1905,5 @@ or any other version of Docker.
                }
            }
    ```
-    
+
+19. Let's start our deployment 

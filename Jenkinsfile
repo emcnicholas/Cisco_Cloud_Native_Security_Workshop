@@ -24,6 +24,7 @@ pipeline{
         SW_ROOT_SCOPE          = '605bacee755f027875a0eef3'
         DEV_EKS_HOST           = '<dev eks host ip>'
         PROD_EKS_HOST          = '<prod eks host ip>'
+        REMOTE_HOSTS           = '["71.175.93.211/32","64.100.11.232/32","100.11.24.79/32"]' //ex: ["172.16.1.1", "192.168.2.2"]
     }
     tools {
         terraform 'Terraform 1.0.3'
@@ -49,7 +50,8 @@ pipeline{
                     -var="aws_az1=$DEV_AWS_AZ1" \
                     -var="aws_az2=$DEV_AWS_AZ2" \
                     -var="ftd_pass=$FTD_PASSWORD" \
-                    -var="key_name=ftd_key"'
+                    -var="key_name=ftd_key" \
+                    -var="remote_hosts=$REMOTE_HOSTS"'
                     //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
                 }
             }
@@ -92,7 +94,8 @@ pipeline{
 //                     -var="aws_az1=$PROD_AWS_AZ1" \
 //                     -var="aws_az2=$PROD_AWS_AZ2" \
 //                     -var="ftd_pass=$FTD_PASSWORD" \
-//                     -var="key_name=ftd_key"'
+//                     -var="key_name=ftd_key"
+//                     -var="remote_hosts=$REMOTE_HOSTS"'
 //                     //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
 //                 }
 //             }

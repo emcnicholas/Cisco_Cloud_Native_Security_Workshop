@@ -32,3 +32,7 @@ variable "aws_az2" {
 variable "key_name" {
   description = "SSH key created in AWS region this deployment is being deployed to"
 }
+variable "remote_hosts" {
+  description = "Remote hosts allowed to access the environment"
+  default = "0.0.0.0/0"
+}
