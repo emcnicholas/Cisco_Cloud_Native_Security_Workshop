@@ -1588,27 +1588,27 @@ or any other version of Docker.
 
 2. Go to the Jenkins home page and select **`New Item`**.
 
-   ![Jenkins Home](/images/jenk-home.png)
+      ![Jenkins Home](/images/jenk-home.png)
 
 3. Enter the name of the pipeline job and select **`Pipeline`**.
 
-   ![Jenkins Item](/images/jenk-new-item.png)
+      ![Jenkins Item](/images/jenk-new-item.png)
 
 4. Select **`Configuration`**. This will bring you to the configuration page. Give the project a description.
 
-   ![Jenkins Configuration](/images/jenk-conf.png)
+      ![Jenkins Configuration](/images/jenk-conf.png)
 
 5. Scroll down to Pipeline, under the **Definition** dropdown select **`Pipeline script from SCM`**. Under **SCM** 
    select **`Git`**. Under **Repository URL** add **Your Forked Repo** URL. Under **Credentials** add your Github 
    credentials. If you don't know how to add your creds to Jenkins go to 
    [Using Credentials](https://www.jenkins.io/doc/book/using/using-credentials/) on the *Using Jenkins* documentation.
    
-   ![Jenkins Pipeline Configuration](/images/jenk-pipeline.png)
+      ![Jenkins Pipeline Configuration](/images/jenk-pipeline.png)
 
 6. Scroll down to **Branches to build** and under **Branch Specifier** change **`*/master`** to **`*/main`**. Under
    **Script Path** add **`Jenkinsfile`**. Select **Apply** and **Save**.
    
-   ![Jenkins Pipeline Configuration](/images/jenk-branch.png)
+      ![Jenkins Pipeline Configuration](/images/jenk-branch.png)
 
 7. Next we need to setup all the credentials in Jenkins so we can pass them to the Jenkinsfile securely using 
    environment variables. Remember in Part 1 of this lab we used the `terraform.tfvars` file to pass these credentials
@@ -1619,7 +1619,7 @@ or any other version of Docker.
    
    From the Jenkins Daskboard go to **Manage Jenkins** then **Manage Credentials**.
 
-   ![Jenkins Manage Credentials](/images/jenk-creds.png)
+      ![Jenkins Manage Credentials](/images/jenk-creds.png)
 
 8. Add the following credentials as **Secret Text** (refer to 
    [Using Credentials](https://www.jenkins.io/doc/book/using/using-credentials/) on how to create Secret Text credentials):
@@ -1631,11 +1631,14 @@ or any other version of Docker.
    * (Optional) Secure Workload API Key
    * (Optional) Secure Workload API Secret
    
+
+      
    ![Jenkins Manage Credentials](/images/jenk-creds-tokens.png)
+   
 
 9. Go back to **`Manage Jenkins`** and select **`Manage Plugins`**.
    
-   ![Jenkins Manage Plugins](/images/jenk-plugins.png)
+      ![Jenkins Manage Plugins](/images/jenk-plugins.png)
 
    Here we are going to add plugins for **`Terraform`** and **`Docker`**. In the search bar search for Terraform. You
    will see a plugin named **`Terraform Plugin`**. Select the install checkbox and click **`Install without restart`**.
@@ -1643,19 +1646,19 @@ or any other version of Docker.
    will see a plugin named **`Docker Pipeline`**. Select the install checkbox and click **`Install without restart`**.
    
 10. Go back to **`Manage Jenkins`** and select **`Global Tool Configuration`**. Scroll down to **`Docker`**. Select 
-   **`Add Docker`**. Give it name and select **`Install automatically`**. Under **`Download from docker.com`** use 
+    **`Add Docker`**. Give it name and select **`Install automatically`**. Under **`Download from docker.com`** use 
     Docker version **`latest`**.
     
-   ![Jenkins Docker Plugin](/images/jenk-docker.png)
+      ![Jenkins Docker Plugin](/images/jenk-docker.png)
 
 11. Scroll down to **`Terraform`**. Select 
    **`Add Terraform`**. Give it name and select **`Install automatically`**. Under **`Install from bintray.com`** 
     select the version of Terraform and system type it will be running on. For example, here Terraform will be running
     on a linux amd64 host.
     
-   ![Jenkins Terraform Plugin](/images/jenk-terraform.png)
+      ![Jenkins Terraform Plugin](/images/jenk-terraform.png)
 
-   Click **`Apply`** and **`Save`**.
+    Click **`Apply`** and **`Save`**.
    
 
 12. Now that the pipeline, credentials and plugins are configured in Jenkins, let's run through the 
@@ -1680,7 +1683,7 @@ or any other version of Docker.
       * **`PROD_EKS_HOST`** This is the public IP address of the Prod EKS Worker Node. We will get this from the Prod 
          Infrastructure build.
         
-      Once variables are updated make sure to `git commit` and 
+      Once variables are added make sure to do a `git commit` and `git push` to update your forked repo.
    
    
    ```
