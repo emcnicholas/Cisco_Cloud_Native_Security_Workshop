@@ -1843,7 +1843,8 @@ or any other version of Docker.
 
 18. So far the Jenkinsfile stages were to deploy the Dev environment. After our testing is complete and successful
     we can deploy our Production environment. We will use the same exact code and modules that we did in the Dev build,
-    except we will pass Prod variables using the Jenkins environment variables.
+    except we will pass Prod variables using the Jenkins environment variables. Below you see that we are running
+    Terraform from **`PROD/Infrastructure`** and **`PROD/Applications`** directories. We are deploying to 
     
    ```
            stage('Deploy PROD Infrastructure'){
