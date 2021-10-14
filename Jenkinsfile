@@ -123,12 +123,15 @@ pipeline{
             }
         }
 
-// Terraform Destroy Stages for Testing
+// !!!CAUTION!!! Terraform Destroy Stages for Testing - Only uncomment to destroy everything
 // Destroy Infrastructure
 //         stage('Destroy DEV Cisco Secure Cloud Native Security'){
 //             steps{
 //                 dir("DEV/Applications"){
 //                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+//                         sh 'terraform state rm tetration_scope.scope'
+//                         sh 'terraform state rm tetration_scope.yelb_app_scope'
+//                         sh 'terraform state rm tetration_scope.nginx_app_scope'
 //                         sh 'terraform destroy -auto-approve \
 //                         -var="aws_access_key=$AWS_ACCESS_KEY_ID" \
 //                         -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" \
@@ -149,7 +152,19 @@ pipeline{
 //             steps{
 //                 dir("PROD/Applications"){
 //                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-//                         sh 'terraform destroy -auto-approve -var="aws_access_key=$AWS_ACCESS_KEY_ID" -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var="lab_id=$PROD_LAB_ID" -var="region=$PROD_AWS_REGION" -var="aws_az1=$PROD_AWS_AZ1" -var="aws_az2=$PROD_AWS_AZ2" -var="sca_service_key=$SCA_SERVICE_KEY" -var="secure_workload_api_key=$SW_API_KEY" -var="secure_workload_api_sec=$SW_API_SEC"'
+//                         sh 'terraform state rm tetration_scope.scope'
+//                         sh 'terraform state rm tetration_scope.yelb_app_scope'
+//                         sh 'terraform state rm tetration_scope.nginx_app_scope'
+//                         sh 'terraform destroy -auto-approve \
+//                         -var="aws_access_key=$AWS_ACCESS_KEY_ID" \
+//                         -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" \
+//                         -var="lab_id=$PROD_LAB_ID" \
+//                         -var="region=$PROD_AWS_REGION" \
+//                         -var="aws_az1=$PROD_AWS_AZ1" \
+//                         -var="aws_az2=$PROD_AWS_AZ2" \
+//                         -var="sca_service_key=$SCA_SERVICE_KEY" \
+//                         -var="secure_workload_api_key=$SW_API_KEY" \
+//                         -var="secure_workload_api_sec=$SW_API_SEC"'
 //                     }
 //                 }
 //             }
