@@ -33,7 +33,7 @@ pipeline{
     stages{
         stage('SCM Checkout'){
             steps{
-                git branch: 'main', url: 'https://$GITHUB_TOKEN@github.com/$MY_REPO'
+                git branch: 'main', url: 'https://$GITHUB_TOKEN@github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
             }
         }
         stage('Build DEV Infrastructure'){
