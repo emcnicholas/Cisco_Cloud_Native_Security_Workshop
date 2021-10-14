@@ -1669,32 +1669,45 @@ or any other version of Docker.
    Next we set the `environment` variables. This is where we set all the variables needed for our deployment. We will
    pass these variables to our stages in the following steps. Notice the `credentials()` variables. This is where we 
    reference the secure variables we created in the Jenkins Credentials manager in the previous step. Also note that we
-   have some variables defined for **`Prod`** and **`Dev`**. I'm pretty sure you can guess what they will be used for.
+   have some variables defined for **`Prod`** and **`Dev`**. I'm pretty sure you can guess what they will be used for. 
+    
+      There are some additional variables needed for our pipeline to work correctly. 
+      * **`GITHUB_REPO`** Add your forked repo here
+      * **`SW_URL`** Add the hostname of your Secure Workload instance
+      * **`SW_ROOT_SCOPE`** Add the Secure Workload Root Scope ID
+      * **`DEV_EKS_HOST`** This is the public IP address of the Dev EKS Worker Node. We will get this from the DEV 
+         Infrastructure build.
+      * **`PROD_EKS_HOST`** This is the public IP address of the Prod EKS Worker Node. We will get this from the Prod 
+         Infrastructure build.
+        
+      Once variables are updated make sure to `git commit` and 
    
    
    ```
    pipeline{
-       agent any
-       environment {
-           LAB_NAME               = 'CNS_Lab'
-           DEV_LAB_ID             = 'Dev'
-           PROD_LAB_ID            = 'Prod'
-           AWS_ACCESS_KEY_ID      = credentials('aws-access-key')
-           AWS_SECRET_ACCESS_KEY  = credentials('aws-secret-key')
-           DEV_AWS_REGION         = 'us-east-2'
-           PROD_AWS_REGION        = 'us-east-1'
-           DEV_AWS_AZ1            = 'us-east-2a'
-           DEV_AWS_AZ2            = 'us-east-2b'
-           PROD_AWS_AZ1           = 'us-east-1a'
-           PROD_AWS_AZ2           = 'us-east-1b'
-           GITHUB_TOKEN           = credentials('github_token')
-           FTD_PASSWORD           = credentials('ftd-password')
-           SCA_SERVICE_KEY        = credentials('sca-service-key')
-           SW_API_KEY             = credentials('sw-api-key')
-           SW_API_SEC             = credentials('sw-api-sec')
-           SW_URL                 = 'https://<hostname>'
-           SW_ROOT_SCOPE          = '<root scope  id>'
-       }
+    environment {
+        LAB_NAME               = 'CNS_Lab'
+        DEV_LAB_ID             = 'Dev'
+        PROD_LAB_ID            = 'Prod'
+        AWS_ACCESS_KEY_ID      = credentials('aws-access-key')
+        AWS_SECRET_ACCESS_KEY  = credentials('aws-secret-key')
+        DEV_AWS_REGION         = 'us-east-2'
+        PROD_AWS_REGION        = 'us-east-1'
+        DEV_AWS_AZ1            = 'us-east-2a'
+        DEV_AWS_AZ2            = 'us-east-2b'
+        PROD_AWS_AZ1           = 'us-east-1a'
+        PROD_AWS_AZ2           = 'us-east-1b'
+        GITHUB_TOKEN           = credentials('github_token')
+        GITHUB_REPO            = '<github repo>' //ex: github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
+        FTD_PASSWORD           = credentials('ftd-password')
+        SCA_SERVICE_KEY        = credentials('sca-service-key')
+        SW_API_KEY             = credentials('sw-api-key')
+        SW_API_SEC             = credentials('sw-api-sec')
+        SW_URL                 = 'https://<hostname>'
+        SW_ROOT_SCOPE          = '<root scope id>'
+        DEV_EKS_HOST           = '<dev eks host ip>'
+        PROD_EKS_HOST          = '<prod eks host ip>'
+    }
    ```
 
 13. Next we add the tools we configured in the previous steps.
