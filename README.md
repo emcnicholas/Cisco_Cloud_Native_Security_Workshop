@@ -1675,13 +1675,13 @@ or any other version of Docker.
    have some variables defined for **`Prod`** and **`Dev`**. I'm pretty sure you can guess what they will be used for. 
     
       There are some additional variables needed for our pipeline to work correctly.
-      * **`SW_URL`** Add the hostname of your Secure Workload instance
-      * **`SW_ROOT_SCOPE`** Add the Secure Workload Root Scope ID
+      * **`REMOTE_HOSTS`** These are the IP addresses that will be permitted access to the FTD Mgmt and EKS APIs
       * **`DEV_EKS_HOST`** This is the public IP address of the Dev EKS Worker Node. We will get this from the DEV 
          Infrastructure build.
       * **`PROD_EKS_HOST`** This is the public IP address of the Prod EKS Worker Node. We will get this from the Prod 
          Infrastructure build.
-      * **`REMOTE_HOSTS`** These are the IP addresses that will be permitted access to the FTD Mgmt and EKS APIs
+      * (Optional) **`SW_URL`** Add the hostname of your Secure Workload instance
+      * (Optional) **`SW_ROOT_SCOPE`** Add the Secure Workload Root Scope ID        
         
       Once variables are added make sure to do a `git commit` and `git push` to update your forked repo.
    
@@ -1735,9 +1735,10 @@ or any other version of Docker.
            }
    ```
 
-15. The next stage is used to build the Dev Infrastructure environment, which is the VPC, EKS and FTDv
-    You see that we are running terraform
-    from the **`DEV/Infrastructure`** directory. You also see that we are using the **DEV** environment
+15. The next stage is used to build the Dev Infrastructure environment, which is the VPC, EKS and FTDv.
+    Notice that we are running terraform
+    from the **`DEV/Infrastructure`** directory. This means this stage is its own terraform root module.
+    Also notice that we are using the **DEV** environment
     variables for the Lab ID, AWS region and availability zones. 
 
    ```
@@ -1763,12 +1764,12 @@ or any other version of Docker.
 
    If you take a look in the 
    [DEV/Infrastructure](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/tree/main/DEV/Infrastructure)
-   directory you will only see **`main.tf`** and **`variables.tf`** files. Where is all the other code we used in the
-   Lab_Build directory? Well let's take a look at the 
+   directory you will only see **`main.tf`** and **`variables.tf`** files. Where is all the other code? 
+   Well let's take a look at the 
    [main.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/DEV/Infrastructure/main.tf)
    file. Because we will be using the same infrastructure code in the Dev and Prod environments, we have built a 
    module. Think of a module like a function, which is repeatable code we can use over and over again. If we need to
-   make changes to the module, it would make changes to both the Dev and Prod environments, which is what we want.
+   make changes to the module, changes would be applied to both the Dev and Prod environments, which is what we want.
 
    ```
    module "Infrastructure" {
@@ -1786,9 +1787,9 @@ or any other version of Docker.
    }
    ```
    
-   As you can see from **`source = "github.com/emcnicholas/Cisco_Cloud_Native_Security_Infrastructure"`** we are getting
+   As you can see from **`source = "github.com/emcnicholas/Cisco_Cloud_Native_Security_Infrastructure"`** we are sourcing
    the module code from GitHub. You can access this repo at 
-   [Cisco Cloud Native Security Infrastructure](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Infrastructure)
+   [Cisco Cloud Native Security Infrastructure](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Infrastructure).
    
    In this repo you will see most of the files and code we built in Part 1. 
 
@@ -1906,4 +1907,74 @@ or any other version of Docker.
            }
    ```
 
-19. Let's start our deployment with the Dev environment. 
+19. OK it's time to start deploying. Let's start our deployment with the Dev environment. Go to the Jenkins Dashboard
+    and select your Pipeline job. Then select **`Build Now`**.
+    
+      ![Jenkins Pipeline Build](/images/jenk-build.png)
+   
+20. The run will start and should look like the screenshot below. You can see the stages we configured in our Jenkinsfile 
+    and if the
+    stages passed for failed. If any of the stages fail, please make sure all the variables are defined correctly and
+    your forked Github repo has been updated. 
+    
+    The first run will take about 20 minutes because the EKS Cluster and FTDv takes time to provision.
+    
+      ![Jenkins Pipeline Build](/images/jenk-run.png)
+   
+21. On the menu bar select **`Open Blue Ocean`**.
+    
+      ![Jenkins Blue Ocean](/images/jenk-blue.png)
+   
+22. Blue Ocean gives us a much better interface for reviewing the output of the runs. Select the latest run to get
+    details.
+
+      ![Jenkins Blue Ocean](/images/jenk-blue-run.png)
+   
+23. At the top you will see the build status. You can click on any stage to get details. Click on 
+    **`Build DEV Infrastructure`** stage and there will be a list of all steps in the stage. 
+    
+      ![Jenkins Blue Ocean](/images/jenk-blue-out.png)
+    
+24. Click through the steps to see the output for each step. Take a look at the last step **`terraform apply`** to
+    get more details on the build.
+    
+      ![Jenkins Blue Ocean](/images/jenk-blue-tf-apply.png)
+    
+25. Scroll all the way down to the bottom, and you will see that 48 resources have been added, and we have some
+    output variables.
+    
+      ![Jenkins Blue Ocean](/images/jenk-blue-tf-apply-comp.png)
+    
+26. Copy and save the output variables as we will need them. Open another browser tab to access the Secure Firewall
+    management interface. Go to https://<dev_ftd_mgmt_ip and verify the firewall is up and running, and the policies 
+    are configured. 
+    
+      ![Secure Firewall Dashboard](/images/ftd-dev-dash.png)
+    
+27. Open your AWS Dashboard and go to Elastic Kubernetes Service. Click on Amazon EKS Clusters and 
+    verify the Cluster name, for example CNS_Lab_Dev, is up and running. 
+    
+      ![AWS EKS Dashboard](/images/aws-eks-cluster.png)
+    
+28. Go to your Cisco Secure Cloud Analytics portal and go to the Sensors screen
+    and verify that the daemonset has been deployed and that events are being consumed. 
+    
+      ![Secure Cloud Analytic Sensors](/images/swc-dev-sensor.png)
+    
+29. Go to your Cisco Secure Workload portal and verify scopes and policies have been built.
+
+      ![Secure Workload Scopes](/images/sw-dev-scopes.png)   ![Secure Workload Policies](/images/sw-dev-policy.png)
+
+    
+27. Using the Terraform outputs from Jenkins **`Build DEV Infrastructure`** stage, copy the **`dev_eks_public_ip`** and go 
+    back to the **`Jenkinsfile`**. Add the IP address to the **`DEV_EKS_HOST`**
+    environment variable *(this step is manual today, but we are building automation to take care of this)*.
+
+         DEV_EKS_HOST           = '<dev eks host ip>'
+
+28. Go down to the **`Test DEV Application`**, **`Deploy PROD Infrastructure`**, and 
+    **`Deploy PROD Cisco Secure Cloud Native Security`** and uncomment these stages. Do a **`git commit`** and 
+    **`git push`** to update your forked repository.
+
+29. Go back into your Jenkins Dashboard, select your Pipeline job and click **Build Now**.
+
