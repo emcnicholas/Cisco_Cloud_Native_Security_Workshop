@@ -1906,4 +1906,4 @@ or any other version of Docker.
            }
    ```
 
-19. Let's start our deployment 
+19. Let's start our deployment with the Dev environment. 

@@ -2,6 +2,7 @@
 
 pipeline{
     agent any
+// Environment Variables
     environment {
         LAB_NAME               = 'CNS_Lab'
         DEV_LAB_ID             = 'Dev'
@@ -26,17 +27,20 @@ pipeline{
         PROD_EKS_HOST          = '<prod eks host ip>'
         REMOTE_HOSTS           = '["71.175.93.211/32","64.100.11.232/32","100.11.24.79/32"]' //ex: ["172.16.1.1", "192.168.2.2"]
     }
+// Jenkins Plugins and Tools
     tools {
         terraform 'Terraform 1.0.3'
         dockerTool 'Docker'
     }
-
+// Pipeline Stages
     stages{
+// Checkout Code from Github Repo
         stage('SCM Checkout'){
             steps{
                 git branch: 'main', url: 'https://$GITHUB_TOKEN@github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
             }
         }
+// Dev Environment Infrastructure Deployment - AWS VPC, EKS, FTDv
         stage('Build DEV Infrastructure'){
             steps{
                 dir("DEV/Infrastructure"){
@@ -56,7 +60,8 @@ pipeline{
                 }
             }
         }
-// Comment out if you are NOT deploying Secure Cloud Analytics or Secure Workload
+// Dev Environment Applications Deployment - Yelb, NGINX, Secure Cloud Analytics and Secure Workload
+// Uncomment to run this stage
         stage('Build DEV Cisco Secure Cloud Native Security'){
             steps{
                 dir("DEV/Applications"){
@@ -77,11 +82,16 @@ pipeline{
                 }
             }
         }
+// Dev Environment Application Test - HTTP GET Request to Yelb UI
+// Make sure the '$DEV_EKS_Host' environment variable is defined
+// Uncomment to run this stage
 //         stage('Test DEV Application'){
 //             steps{
 //                 httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://$DEV_EKS_HOST:30001', validResponseCodes: '200', wrapAsMultipart: false
 //             }
 //         }
+// Prod Environment Infrastructure Deployment - AWS VPC, EKS, FTDv
+// Uncomment to run this stage
 //         stage('Deploy PROD Infrastructure'){
 //             steps{
 //                 dir("PROD/Infrastructure"){
@@ -100,7 +110,8 @@ pipeline{
 //                 }
 //             }
 //         }
-// // Comment out if you are NOT deploying Secure Cloud Analytics or Secure Workload
+// Prod Environment Applications Deployment - Yelb, NGINX, Secure Cloud Analytics and Secure Workload
+// Uncomment to run this stage
 //         stage('Deploy PROD Cisco Secure Cloud Native Security'){
 //             steps{
 //                 dir("PROD/Applications"){
@@ -120,14 +131,16 @@ pipeline{
 //                 }
 //             }
 //         }
+// Prod Environment Application Test - HTTP GET Request to Yelb UI
+// Make sure the '$PROD_EKS_Host' environment variable is defined
+// Uncomment to run this stage
 //         stage('Test PROD Application'){
 //             steps{
 //                 httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://$PROD_EKS_HOST:30001', validResponseCodes: '200', wrapAsMultipart: false
 //             }
 //         }
-
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CAUTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// Terraform Destroy Stages for Testing - Only uncomment to destroy everything
+// Terraform Destroy Stages for Testing - Only uncomment to destroy environment
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // Destroy Infrastructure
 //         stage('Destroy DEV Cisco Secure Cloud Native Security'){
