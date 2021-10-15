@@ -132,11 +132,11 @@ pipeline{
 // Prod Environment Application Test - HTTP GET Request to Yelb UI
 // Make sure the '$PROD_EKS_Host' environment variable is defined
 // Uncomment to run this stage
-//         stage('Test PROD Application'){
-//             steps{
-//                 httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://$PROD_EKS_HOST:30001', validResponseCodes: '200', wrapAsMultipart: false
-//             }
-//         }
+        stage('Test PROD Application'){
+            steps{
+                httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://50.17.16.197:30001', validResponseCodes: '200', wrapAsMultipart: false
+            }
+        }
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CAUTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // Terraform Destroy Stages for Testing - Only uncomment to destroy environment
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

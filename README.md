@@ -1675,11 +1675,6 @@ or any other version of Docker.
    have some variables defined for **`Prod`** and **`Dev`**. I'm pretty sure you can guess what they will be used for. 
     
       There are some additional variables needed for our pipeline to work correctly.
-      * **`REMOTE_HOSTS`** These are the IP addresses that will be permitted access to the FTD Mgmt and EKS APIs
-      * **`DEV_EKS_HOST`** This is the public IP address of the Dev EKS Worker Node. We will get this from the DEV 
-         Infrastructure build.
-      * **`PROD_EKS_HOST`** This is the public IP address of the Prod EKS Worker Node. We will get this from the Prod 
-         Infrastructure build.
       * (Optional) **`SW_URL`** Add the hostname of your Secure Workload instance
       * (Optional) **`SW_ROOT_SCOPE`** Add the Secure Workload Root Scope ID        
         
@@ -1707,9 +1702,6 @@ or any other version of Docker.
         SW_API_SEC             = credentials('sw-api-sec')
         SW_URL                 = 'https://<hostname>'
         SW_ROOT_SCOPE          = '<root scope id>'
-        DEV_EKS_HOST           = '<dev eks host ip>'
-        PROD_EKS_HOST          = '<prod eks host ip>'
-        REMOTE_HOSTS           = '[""]' //ex: ["172.16.1.1", "192.168.2.2"]
     }
    ```
 
@@ -1724,14 +1716,14 @@ or any other version of Docker.
    ```
 
 14. Then we start building out our stages. The first stage is to checkout the repository. As you can see below we are
-    checking out the Cisco Cloud Native Security Workshop repo. When running this live you should use your forked repo.
+    checking out the Cisco Cloud Native Security Workshop repo. **When running this live you should use your forked repo.**
     Also notice we are using the **`$GITHUB_TOKEN`** environment variable.
 
    ```
    stages{
        stage('SCM Checkout'){
            steps{
-               git branch: 'main', url: 'https://$GITHUB_TOKEN@github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
+               git branch: 'main', url: 'https://$GITHUB_TOKEN@github.com/<YOUR_GITHUB>/<YOUR_REPO>.git'
            }
    ```
 
@@ -1770,6 +1762,9 @@ or any other version of Docker.
    file. Because we will be using the same infrastructure code in the Dev and Prod environments, we have built a 
    module. Think of a module like a function, which is repeatable code we can use over and over again. If we need to
    make changes to the module, changes would be applied to both the Dev and Prod environments, which is what we want.
+
+   Add your remote hosts that you want to allow access to the FTD Management interface and AWS EKS API to the 
+   **`remote_hosts`** variable here.
 
    ```
    module "Infrastructure" {
@@ -1907,8 +1902,96 @@ or any other version of Docker.
            }
    ```
 
-19. OK it's time to start deploying. Let's start our deployment with the Dev environment. Go to the Jenkins Dashboard
-    and select your Pipeline job. Then select **`Build Now`**.
+19. OK it's time to start deploying. Let's start our deployment with the Dev environment. First go to the **`Jenkinsfile`**
+    and make sure only the following is uncommented.
+    
+   ```
+   // Pipeline
+   
+   pipeline{
+       agent any
+   // Environment Variables
+       environment {
+           LAB_NAME               = 'CNS_Lab'
+           DEV_LAB_ID             = 'Dev'
+           PROD_LAB_ID            = 'Prod'
+           AWS_ACCESS_KEY_ID      = credentials('aws-access-key')
+           AWS_SECRET_ACCESS_KEY  = credentials('aws-secret-key')
+           DEV_AWS_REGION         = 'us-east-2'
+           PROD_AWS_REGION        = 'us-east-1'
+           DEV_AWS_AZ1            = 'us-east-2a'
+           DEV_AWS_AZ2            = 'us-east-2b'
+           PROD_AWS_AZ1           = 'us-east-1a'
+           PROD_AWS_AZ2           = 'us-east-1b'
+           GITHUB_TOKEN           = credentials('github_token')
+           MY_REPO                = 'emcnicholas/Cisco_Cloud_Native_Security_Workshop.git' //ex: github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
+           FTD_PASSWORD           = credentials('ftd-password')
+           SCA_SERVICE_KEY        = credentials('sca-service-key')
+           SW_API_KEY             = credentials('sw-api-key')
+           SW_API_SEC             = credentials('sw-api-sec')
+           SW_URL                 = 'https://tet-pov-rtp1.cpoc.co'
+           SW_ROOT_SCOPE          = '605bacee755f027875a0eef3'
+           DEV_EKS_HOST           = '3.19.111.199'
+           PROD_EKS_HOST          = '<prod eks host ip>'
+           REMOTE_HOSTS           = '["71.175.93.211/32","64.100.11.232/32","100.11.24.79/32"]' //ex: ["172.16.1.1", "192.168.2.2"]
+       }
+   // Jenkins Plugins and Tools
+       tools {
+           terraform 'Terraform 1.0.3'
+           dockerTool 'Docker'
+       }
+   // Pipeline Stages
+       stages{
+   // Checkout Code from Github Repo
+           stage('SCM Checkout'){
+               steps{
+                   git branch: 'main', url: 'https://$GITHUB_TOKEN@github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop.git'
+               }
+           }
+   // Dev Environment Infrastructure Deployment - AWS VPC, EKS, FTDv
+           stage('Build DEV Infrastructure'){
+               steps{
+                   dir("DEV/Infrastructure"){
+                       sh 'terraform get -update'
+                       sh 'terraform init'
+                       sh 'terraform apply -auto-approve \
+                       -var="aws_access_key=$AWS_ACCESS_KEY_ID" \
+                       -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" \
+                       -var="lab_id=$DEV_LAB_ID" \
+                       -var="region=$DEV_AWS_REGION" \
+                       -var="aws_az1=$DEV_AWS_AZ1" \
+                       -var="aws_az2=$DEV_AWS_AZ2" \
+                       -var="ftd_pass=$FTD_PASSWORD" \
+                       -var="key_name=ftd_key"'
+                       //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
+                   }
+               }
+           }
+   // Dev Environment Applications Deployment - Yelb, NGINX, Secure Cloud Analytics and Secure Workload
+   // Uncomment to run this stage
+           stage('Build DEV Cisco Secure Cloud Native Security'){
+               steps{
+                   dir("DEV/Applications"){
+                       sh 'terraform get -update'
+                       sh 'terraform init'
+                       sh 'terraform apply -auto-approve \
+                       -var="aws_access_key=$AWS_ACCESS_KEY_ID" \
+                       -var="aws_secret_key=$AWS_SECRET_ACCESS_KEY" \
+                       -var="lab_id=$DEV_LAB_ID" \
+                       -var="region=$DEV_AWS_REGION" \
+                       -var="aws_az1=$DEV_AWS_AZ1" \
+                       -var="aws_az2=$DEV_AWS_AZ2" \
+                       -var="sca_service_key=$SCA_SERVICE_KEY" \
+                       -var="secure_workload_api_key=$SW_API_KEY" \
+                       -var="secure_workload_api_sec=$SW_API_SEC" \
+                       -var="secure_workload_api_url=$SW_URL" \
+                       -var="secure_workload_root_scope=$SW_ROOT_SCOPE"'
+                   }
+               }
+           }
+   ```
+
+   Go to the Jenkins Dashboard and select your Pipeline job. Then select **`Build Now`**.
     
       ![Jenkins Pipeline Build](/images/jenk-build.png)
    
@@ -1966,15 +2049,47 @@ or any other version of Docker.
       ![Secure Workload Scopes](/images/sw-dev-scopes.png)   ![Secure Workload Policies](/images/sw-dev-policy.png)
 
     
-27. Using the Terraform outputs from Jenkins **`Build DEV Infrastructure`** stage, copy the **`dev_eks_public_ip`** and go 
-    back to the **`Jenkinsfile`**. Add the IP address to the **`DEV_EKS_HOST`**
-    environment variable *(this step is manual today, but we are building automation to take care of this)*.
+30. Using the Terraform outputs from Jenkins **`Build DEV Infrastructure`** stage, copy the **`dev_eks_public_ip`** and go 
+    back to the **`Jenkinsfile`**. Add the IP address to the **`Test DEV Application`** stage
+    *(this step is manual today, but we are building automation to take care of this)*.
 
-         DEV_EKS_HOST           = '<dev eks host ip>'
+   ```
+           stage('Test DEV Application'){
+               steps{
+                   httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://<dev_eks_public_ip>:30001', validResponseCodes: '200', wrapAsMultipart: false
+               }
+           }
+   ```
 
-28. Go down to the **`Test DEV Application`**, **`Deploy PROD Infrastructure`**, and 
+31. Go down to the **`Test DEV Application`**, **`Deploy PROD Infrastructure`**, and 
     **`Deploy PROD Cisco Secure Cloud Native Security`** and uncomment these stages. Do a **`git commit`** and 
     **`git push`** to update your forked repository.
 
-29. Go back into your Jenkins Dashboard, select your Pipeline job and click **Build Now**.
+32. Go back into your Jenkins Dashboard, select your Pipeline job and click **Build Now**. You will see the additional
+    stages added for Prod. 
 
+      ![Jenkins Build](/images/jenk-prod-build.png)
+    
+33. Now go to the Blue Ocean and review the build.
+
+      ![Jenkins Build](/images/jenk-prod-blue.png)
+    
+34. In the Blue Ocean interface, select the **`Deploy PROD Infrastructure`** stage. Extend the **`terraform apply`**
+    step. Scroll down to the bottom and copy the terraform outputs. Copy the **`prod_eks_public_ip`** variable IP
+    address. Go back into the **`Jenkinsfile`** and go down to the **`Test PROD Application`** stage. Uncomment the 
+    stage and add the **`prod_eks_public_ip`** IP address.
+    
+   ```
+           stage('Test PROD Application'){
+               steps{
+                   httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://<prod_eks_public_ip>:30001', validResponseCodes: '200', wrapAsMultipart: false
+               }
+           }
+   ```
+35. Go back to the Jenkins Dashboard, select your pipeline job and run it.
+
+
+    
+    
+
+    
