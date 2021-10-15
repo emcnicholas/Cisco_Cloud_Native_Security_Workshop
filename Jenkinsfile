@@ -86,7 +86,7 @@ pipeline{
 // Uncomment to run this stage
         stage('Test DEV Application'){
             steps{
-                httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://3.19.111.199:30001', validResponseCodes: '200', wrapAsMultipart: false
+                httpRequest consoleLogResponseBody: true, ignoreSslErrors: true, responseHandle: 'NONE', url: 'http://18.224.79.165:30001', validResponseCodes: '200', wrapAsMultipart: false
             }
         }
 // Prod Environment Infrastructure Deployment - AWS VPC, EKS, FTDv
