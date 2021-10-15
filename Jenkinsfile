@@ -54,8 +54,7 @@ pipeline{
                     -var="aws_az1=$DEV_AWS_AZ1" \
                     -var="aws_az2=$DEV_AWS_AZ2" \
                     -var="ftd_pass=$FTD_PASSWORD" \
-                    -var="key_name=ftd_key" \
-                    -var="remote_hosts=$REMOTE_HOSTS"'
+                    -var="key_name=ftd_key"'
                     //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
                 }
             }
@@ -104,8 +103,7 @@ pipeline{
                     -var="aws_az1=$PROD_AWS_AZ1" \
                     -var="aws_az2=$PROD_AWS_AZ2" \
                     -var="ftd_pass=$FTD_PASSWORD" \
-                    -var="key_name=ftd_key" \
-                    -var="remote_hosts=$REMOTE_HOSTS"'
+                    -var="key_name=ftd_key"'
                     //sh 'docker run -v $(pwd)/Ansible:/ftd-ansible/playbooks -v $(pwd)/Ansible/hosts.yaml:/etc/ansible/hosts ciscodevnet/ftd-ansible playbooks/ftd_configuration.yaml'
                 }
             }
