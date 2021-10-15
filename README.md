@@ -2088,7 +2088,7 @@ or any other version of Docker.
    ```
 35. Go back to the Jenkins Dashboard, select your pipeline job and run it.
 
-
+      ![Jenkins Build](/images/jenk-build-final.png)
     
     
 
