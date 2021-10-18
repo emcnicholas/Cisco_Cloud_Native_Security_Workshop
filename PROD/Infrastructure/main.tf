@@ -11,5 +11,5 @@ module "Infrastructure" {
   aws_az1        = var.aws_az1
   aws_az2        = var.aws_az2
   key_name       = var.key_name
-  remote_hosts   = ["71.175.93.211/32","64.100.11.232/32","100.11.24.79/32"]
+  remote_hosts   = [""] //ex: ["172.16.1.1", "192.168.2.2"]
 }

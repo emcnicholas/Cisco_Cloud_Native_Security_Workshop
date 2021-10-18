@@ -2089,6 +2089,10 @@ or any other version of Docker.
 35. Go back to the Jenkins Dashboard, select your pipeline job and run it.
 
       ![Jenkins Build](/images/jenk-build-final.png)
+
+36. Go into Blue Ocean and explore the full pipeline run.
+
+### Congratulations you have completed the Cisco Cloud Native Workshop!!!
     
     
 
