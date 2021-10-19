@@ -570,13 +570,14 @@ objects.
 In this section we configure Kubernetes resources using Terraform.
 
 1. First lets take a look at the Kubernetes providers we will initialize. At the beginning of the code we tell terraform 
-   what version of the provider is required. This is very important because some features we us in our IaC may be 
+   what version of the provider is required. This is very important because some features we use in our IaC may be 
    version specific. Next we add a couple data sources which we will fetch the EKS cluster CA Cert and Token. We use
    the data sources to configure authentication for the Kubernetes and kubectl providers. Why are there two providers
    for K8s? The first, `provider "kubernetes"` is the official Kubernetes provider and has resources and data sources
    built for almost anything you want to create via the K8s API. The second, `provider "kubectl"` allows us to apply
    native YAML files like we would if we were using the kubectl CLI. So for example, if we had a yaml file and we just
-   wanted to apply it without building it as a resource, we can use the [Kubectl Provider](https://registry.terraform.io/providers/gavinbunney/kubectl/latest/docs). 
+   wanted to apply it as one resource instead of a bunch of resources, we can use the 
+   [Kubectl Provider](https://registry.terraform.io/providers/gavinbunney/kubectl/latest/docs). 
    If we can build the resource out, we can use the 
    [Kubernetes Provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs). 
    You will see this in the next few steps where we use the kubectl provider to apply a config map, but use the 
@@ -623,7 +624,7 @@ In this section we configure Kubernetes resources using Terraform.
 2. For our EKS cluster to work correctly we need to allow the EKS worker node to communicate with the Cluster API. To 
    do this we need to apply a [Config Map](https://kubernetes.io/docs/concepts/configuration/configmap/) in 
    kubernetes. It is initially created to allow your nodes to join your cluster, but you also use this ConfigMap to add 
-   RBAC access to IAM users and roles. Here we created a file called `config_map_aws_auth.tf`. Lets talk a look at 
+   RBAC access to IAM users and roles. Here we created a file called **`config_map_aws_auth.tf`**. Lets talk a look at 
    [config_map_aws_auth.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/config_map_aws_auth.tf)
    file.
    
@@ -649,28 +650,28 @@ In this section we configure Kubernetes resources using Terraform.
    }
    ```
    
-   We use the `kubectl_manifest` resource here to apply the config map using YAML. Notice the `rolearn` has a value of
-   the role we created in our `eks.tf` file. This will allow our worker node to talk to the Cluster API.
+   We use the `kubectl_manifest` resource here to apply the config map using YAML. Notice the **`rolearn`** has a value 
+   of the role we created in our **`eks.tf`** file. This will allow our worker node to talk to the Cluster API.
    
 
 ### Provision the Infrastructure as Code
-At this point you are ready to provision all the code in the the `/Lab_Build` directory. The code at this point will 
+At this point you are ready to provision all the code in the **`/Lab_Build`** directory. The code at this point will 
 provision a VPC, FTDv Instance, EKS Cluster and EKS Node *(the provisioning of Cisco Secure Cloud Analytics,
 Secure Workload, and Secure Cloud Native are adding in later steps that are optional but recommended)*.
-This means running the *terraform init, plan, and apply* commands in the directory we are working in. The `terraform
-plan` command creates an execution plan by reading the current state of any already-existing remote objects to make sure 
+This means running the *terraform init, plan, and apply* commands in the directory we are working in. The **`terraform
+plan`** command creates an execution plan by reading the current state of any already-existing remote objects to make sure 
 that the Terraform state is up-to-date, comparing the current configuration to the prior state and noting any 
 differences, and proposing a set of change actions that should, if applied, make the remote objects match the 
-configuration. The `terraform apply` command executes the actions proposed in a Terraform plan.
+configuration. The **`terraform apply`** command executes the actions proposed in a Terraform plan.
 For more information about terraform provisioning, see 
 [Provisioning Infrastructure with Terraform](https://www.terraform.io/docs/cli/run/index.html).
 
-1. Make sure you are in the `/Lab_Build` directory. Run the `terraform init` command. The 
+1. Make sure you are in the **`/Lab_Build`** directory. Run the **`terraform init`** command. The 
    [terraform init](https://www.terraform.io/docs/cli/commands/init.html) command is used
    to initialize a working directory containing Terraform configuration files. This is the first command that should be 
    run after writing a new Terraform configuration or cloning an existing one from version control. It is safe to run 
    this command multiple times. This will initialize all the providers and version that we declared in
-   the `main.tf` file.
+   the **`main.tf`** file.
    
    ```
    Terraform % terraform init
@@ -701,9 +702,9 @@ For more information about terraform provisioning, see
 
    ```  
    
-2. Run the `terraform plan` using an output file, `terraform plan -out 
-   tfplan`. This writes the generated plan to the given filename in an opaque file format that you can later pass to
-   terraform apply to execute the planned changes. Here we see that we are planning to deploy 60 new resources. We 
+2. Run the **`terraform plan`** using an output file, **`terraform plan -out 
+   tfplan`**. This writes the generated plan to the given filename in an opaque file format that you can later pass to
+   terraform apply to execute the planned changes. Here we see that we are planning to deploy 48 new resources. We 
    omitted the data in the snippet below because it was too much, but you should always double check the full plan before
    you apply it.
    
@@ -721,7 +722,7 @@ For more information about terraform provisioning, see
    Plan: 48 to add, 0 to change, 0 to destroy.
 
    Changes to Outputs:
-      + eks_cluster_name = "CNS_Lab_55"
+      + eks_cluster_name = "CNS_Lab_Test"
       + eks_public_ip    = (known after apply)
       + ftd_mgmt_ip      = (known after apply)
    
@@ -734,10 +735,10 @@ For more information about terraform provisioning, see
    
    ```
 
-3. Apply the plan using the `terraform apply "tfplan"` command. 
+3. Apply the plan using the **`terraform apply "tfplan"`** command. 
    The [terraform apply](https://www.terraform.io/docs/cli/commands/apply.html) command executes the actions proposed 
    in a Terraform plan. Once again below we omitted a lot of the output data, but you can see we start building the 
-   infrastructure. At the end you should see 60 resources added, and some **Outputs:** we can use to access the 
+   infrastructure. At the end you should see 48 resources added, and some **Outputs:** we can use to access the 
    resources. Save these outputs as we will need them in the next step.
 
    ```
@@ -754,7 +755,7 @@ For more information about terraform provisioning, see
    
    ... data omitted
    
-   Apply complete! Resources: 60 added, 0 changed, 0 destroyed.
+   Apply complete! Resources: 48 added, 0 changed, 0 destroyed.
    
    Outputs:
    
@@ -764,12 +765,12 @@ For more information about terraform provisioning, see
    ```
 
 ### Access the Environment
-Use the outputs generated from the `output.tf` file to access the environment. The IP addresses and ports above may be
-different, so make sure to use the outputs from your `terraform apply`.
+Use the outputs generated from the **`output.tf`** file to access the environment. The IP addresses and ports above may 
+be different, so make sure to use the outputs from your **`terraform apply`**.
 
 1. Access the Secure Firewall (FTDv) management interface by going to `https://<ftd_mgmt_ip>` where <ftd_mgmt_ip> is
    the IP from the `ftd_mgmt_ip` output. This will bring you to a logon page. Enter the username and password you defined
-   in the `terraform.tfvars` file.
+   in the **`terraform.tfvars`** file.
    
    ![FTDv Logon Page](/images/ftd-login.png)
 
@@ -787,13 +788,13 @@ different, so make sure to use the outputs from your `terraform apply`.
    ![FTDv Interfaces](/images/ftd-int.png)
  
 3. Access your AWS account portal and select **Services** > **Compute** > **EC2**. There will be two instances running
-   named `CNS_Lab_<lab_id>_FTDv` and `CNS_Lab_<lab_id>_node`. The `CNS_Lab_<lab_id>_FTDv` is obviously the firewall and 
-   the `CNS_Lab_<lab_id>_node` is the EKS worker node where we will deploy our applications.
+   named **`CNS_Lab_<lab_id>_FTDv`** and **`CNS_Lab_<lab_id>_node`**. The **`CNS_Lab_<lab_id>_FTDv`** is obviously the 
+   firewall and the **`CNS_Lab_<lab_id>_node`** is the EKS worker node where we will deploy our applications.
    
    ![AWS Compute](/images/aws-ec2.png)
 
 4. Next lets go to **Services** > **Containers** > **Elastic Kubernetes Service**. Under **Amazon EKS** select 
-   **Clusters**. There will be EKS cluster named `CNS_Lab_<lab_id>`. 
+   **Clusters**. There will be EKS cluster named **`CNS_Lab_<lab_id>`**. 
    
    ![AWS EKS Cluster](/images/eks-cluster.png)
    
@@ -803,7 +804,7 @@ different, so make sure to use the outputs from your `terraform apply`.
 
 5. Finally, select to **Services** > **Networking & Content Delivery** > **VPC**. Select **Your VPC**. On the left
    hand menu bar click through VPCs, Subnets, Route Tables, Internet Gateways, and Elatic IPs. You will see resources 
-   with the CNS_Lab_<lab_id> appended to the name of the resources.
+   with the **`CNS_Lab_<lab_id>`** appended to the name of the resources.
    
    ![AWS VPC](/images/aws-vpc.png)
 
@@ -812,9 +813,9 @@ different, so make sure to use the outputs from your `terraform apply`.
    Make sure your AWS CLI Configuration is updated and run the following command where `<aws-region>` is the region 
    the EKS cluster is deployed and where `<cluster-name>` in the EKS cluster name.
    
-   `aws eks --region <aws-region> update-kubeconfig --name <cluster-name>`
+   **`aws eks --region <aws-region> update-kubeconfig --name <cluster-name>`**
 
-   For example `aws eks --region us-east-2 update-kubeconfig --name CNS_LAB_Test`
+   For example **`aws eks --region us-east-2 update-kubeconfig --name CNS_LAB_Test`**
 
 
 The infrastructure is now deployed and being secured by Cisco Secure Firewall. This provides us protections for inbound 
@@ -833,17 +834,19 @@ kubernetes resource using Terraform, but any changes outside the terraform file 
 Provider, it will deploy a resource using native YAML file, which makes it easier to use community writen manifests,
 but now this resource is tracked as a full manifest, and not each service like the Kubernetes Provider. Using the 
 Local Provisioner should always be a last resort, but it is a quick and easy way to get up and going if you are a *kubectl*
-cli user. There is no state when using the Local Provisioner, so terraform will not track and changes.
+cli user. There is no state in Terraform when using the Local Provisioner, so Terraform will not track and changes.
 
-1. In Part 1 we will deploy our applications using the Kubernetes Provider. In the `Lab_Build` directory there are two 
-files named `yelb_app` and `nginx.app`. Change the names to use the `.tf` extension, `yelb_app.tf` and `nginx_app.tf`.
+1. In Part 1 we will deploy our applications using the Kubernetes Provider. In the **`Lab_Build`** directory there are two 
+   files named **`yelb_app`** and **`nginx.app`**. Change the names to use the **`.tf`** extension, **`yelb_app.tf`**
+   and **`nginx_app.tf`**.
    
 
 2. Yelb is a cool 3 tier demo app that allows users to vote on a set of alternatives 
    (restaurants) and dynamically updates pie charts based on number of votes received. If you want some more details
    about this app check out the [Yelb GitHub](https://github.com/mreferre/yelb). For this app we built a terraform file
-   named `yelb_app.tf`. In this file we create kubernetes resources such as `kubernetes_namespace`, `kubernetes_service`,
-   and `kubernetes_deployment`. Below is an example for just the Yelb web server resources. Take a look at the full manifest at 
+   named **`yelb_app.tf`**. In this file we create kubernetes resources such as **`kubernetes_namespace`**, 
+   **`kubernetes_service`**, and **`kubernetes_deployment`**. Below is an example for just the Yelb web server resources. 
+   Take a look at the full manifest at 
    [yelb_app](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/yelb_app) for 
    all the services and pods that are created for the Yelb application.
    
@@ -915,11 +918,11 @@ files named `yelb_app` and `nginx.app`. Change the names to use the `.tf` extens
    ```
 
 
-3. We also configure a second app using the `nginx_app.tf` file. This app is just a NGINX test page that we can play
+3. We also configure a second app using the **`nginx_app.tf`** file. This app is just a NGINX test page that we can play
    with when testing out security controls. Check out the configuration of that app at 
    [nginx_app.tf](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/nginx_app).
    
-4. Run the `terraform plan -out tfplan` and `terraform apply "tfplan"` again to deploy these applications.
+4. Run the **`terraform plan -out tfplan`** and **`terraform apply "tfplan"`** again to deploy these applications.
 
    ```
    Plan: 9 to add, 0 to change, 1 to destroy.
@@ -953,31 +956,34 @@ files named `yelb_app` and `nginx.app`. Change the names to use the `.tf` extens
    ```
 
 
-5. Access the Yelb app by going to `http://<eks_public_ip>:30001` where <eks_public_ip> is the IP address of
-   the terraform output `eks_public_ip`, for example in this case `http://18.117.14.78:30001. Where did that service
-   port come from?
+5. Access the Yelb app by going to **`http://<eks_public_ip>:30001`** where <eks_public_ip> is the IP address of
+   the terraform output **`eks_public_ip`**, for example in this case `http://18.117.14.78:30001. Do you know where 
+   that service port came from? Take a look at the Yelb UI Service.
    
    ![Yelb UI](/images/yelb.png)
 
-6. Access the NGINX app by going to `http://<eks_public_ip>:30201` where <eks_public_ip> is the IP address of
-   the `eks_public_ip` output.
+6. Access the NGINX app by going to **`http://<eks_public_ip>:30201`** where <eks_public_ip> is the IP address of
+   the **`eks_public_ip`** output.
    
    ![NGINX UI](/images/nginx.png)
 
 7. Verify the kubernetes environment using the kubectl client.
-   1. Update the kube config file by running `aws eks --region <aws-region> update-kubeconfig --name <eks-cluster-name>` 
-      where <eks-cluster-name> is the name of the `eks_cluster_name` output and the <aws-region> is the region you are
+   1. If you didn't already, update the kube config file by running 
+      **`aws eks --region <aws-region> update-kubeconfig --name <eks-cluster-name>`** 
+      where <eks-cluster-name> is the name of the **`eks_cluster_name`** output and the <aws-region> is the region you are
       deploying to.
+      
+      For example:
 
       ```
       Terraform % aws eks --region us-east-2 update-kubeconfig --name CNS_Lab_Test
       Added new context arn:aws:eks:us-east-2:208176673708:cluster/CNS_Lab_Test to /Users/edmcnich/.kube/config
       ```
       
-   2. Run some commands to verify the resources were implemented. Run `kubectl get nodes` which will show what EKS 
-      worker nodes are available to the cluster. In this lab it is just one node. Run `kubectl get ns` to see the 
-      Yelb and NGINX namespaces we created. Run `kubectl get pods -n yeb` to see all th pods we created in the Yelb
-      namespace. Run `kubectl get service -n yelb` to view all the services we created for the Yelb namespace.
+   2. Run some commands to verify the resources were implemented. Run **`kubectl get nodes`** which will show what EKS 
+      worker nodes are available to the cluster. In this lab it is just one node. Run **`kubectl get ns`** to see the 
+      Yelb and NGINX namespaces we created. Run **`kubectl get pods -n yeb`** to see all th pods we created in the Yelb
+      namespace. Run **`kubectl get service -n yelb`** to view all the services we created for the Yelb namespace.
       
       ```
       Terraform % kubectl get nodes
@@ -1020,43 +1026,44 @@ provides the visibility and threat detection capabilities you need to keep your 
 secure in all major cloud environments like Amazon Web Services (AWS), Microsoft Azure, and Google Cloud Platform, and 
 guess what, it supports integration directly with the kubernetes cluster. 
 
-1. Log in to your Secure Cloud Analytics portal and go to `Setting` then `Integrations`. 
+1. Log in to your Secure Cloud Analytics portal and go to **`Setting`** > **`Integrations`**. 
 
    ![Secure Cloud Analytics Dashboard](/images/swc-dash.png)
    
-2. On the Setting menu bar select `Integrations` then `Kubernetes`.
+2. On the Setting menu bar select **`Integrations`** > **`Kubernetes`**.
 
    ![Secure Cloud Analytics Settings](/images/swc-inte.png)
 
-3. This brings you to the Kubernetes Integration page. This page give you step by step instructions
-   on how to deploy Secure Cloud Analytics to your kubernetes cluster using the `kubectl` client.
+3. This brings you to the Kubernetes Integration page. This page gives you step-by-step instructions
+   on how to deploy Secure Cloud Analytics to your kubernetes cluster using the **`kubectl`** client.
    Luckily we have created a terraform file that will deploy all necessary resources, but first we need
-   to get the `secret key` from the integration page. On the integration page the first step is to 
+   to get the **`secret key`** from the integration page. On the integration page the first step is to 
    create a secret key file. We don't need to run this step, we just need copy and save the key itself. Where it says
-   `echo -n "<secret_key>" > obsrvbl-service-key.txt`, copy and save this key.
+   **`echo -n "<secret_key>" > obsrvbl-service-key.txt`**, copy and save this key.
    
    ![Secure Cloud Analytics Secret Key](/images/swc-key.png)
 
-4. Go to the `terraform.tfvars` file and add this key to the Secure Cloud Analytics `sca_service_key` variable. Make
-   sure to uncomment (`//`) variable
+4. In the **`/Lab_Build`** directory, go to the **`terraform.tfvars`** file and add this key to the Secure Cloud 
+   Analytics **`sca_service_key`** variable. Make sure to uncomment (**`//`**) the variable.
 
    ```
    sca_service_key    = "<secret_key>"
    ```
    
-   Go to the `variables.tf` file and uncomment the variable there as well
+   Go to the **`variables.tf`** file and uncomment the variable there as well
 
    ```
    variable "sca_service_key" {}
    ```
    
-5. Find the file named `secure_cloud_analytics` and change it to `secure_cloud_analytics.tf` so terraform can read it.
-   Click [secure_cloud_analytics](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/secure_cloud_analytics)
+5. Find the file named **`secure_cloud_analytics`** and change it to **`secure_cloud_analytics.tf`** so terraform can 
+   read it. Click 
+   [secure_cloud_analytics](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/secure_cloud_analytics)
    to view the file.
    
-6. Run `terraform plan -out tfplan` and review the resource that will be created. Run `terraform apply "tfplan"` to 
-   create the resources. 4 kubernetes resources will be created, secret, service account, cluster role binding, and a
-   daemonset. 
+6. Run **`terraform plan -out tfplan`** and review the resource that will be created. Run **`terraform apply "tfplan"`**
+   to create the resources. 4 kubernetes resources will be created, *secret, service account, cluster role binding, and a
+   daemonset*. 
    
    ```
    kubernetes_secret.obsrvbl: Creating...
@@ -1073,13 +1080,14 @@ guess what, it supports integration directly with the kubernetes cluster.
    ```   
    
 7. Run some more kubectl commands to verify the infrastructure:
-   * `kubectl get pods`
+   * **`kubectl get pods`**
       ```   
        Terraform % kubectl get pods
       NAME                READY   STATUS    RESTARTS   AGE
       obsrvbl-ona-z4lkj   1/1     Running   0          74m
       ```
-   * `kubectl get daemonset` What is a [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)?
+   * **`kubectl get daemonset`** 
+     What is a [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)?
       ```
       Terraform % kubectl get ds 
       NAME          DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
@@ -1092,12 +1100,12 @@ guess what, it supports integration directly with the kubernetes cluster.
    ![Secure Cloud Analytics](/images/swc-sensor.png)
 
    This will take you to the Sensors screen. There will be a sensor named after the EC2 instance,
-   for example `ip-10-0-1-90.us-east-2.compute.internal`. It may take a few minutes for the sensor to start receiving 
-   data, and the icon to turn green.
+   for example **`ip-10-0-1-90.us-east-2.compute.internal`**. It may take a few minutes for the sensor to start 
+   receiving data, and the icon to turn green.
    
    ![Secure Cloud Analytics Sensors](/images/swc-sen.png)
 
-   Once the sensor starts collecting data you can select `Investigate` then `Device`.
+   Once the sensor starts collecting data you can select **`Investigate`** > `Device`.
 
    ![Secure Cloud Analytics Sensors](/images/swc-devices.png)
 
