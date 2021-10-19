@@ -1162,7 +1162,7 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    We also need the Secure Workload hostname and Root Scope ID. Go to **`Organize`** > **`Scopes and Inventory`**. 
    The Root Scope is the top scope in the scope tree, for example in this case the root scope is **`edmcnich`**.
    Select the root scope and up in the URL field of the broswer you can see the hostname and Scope ID as highlighted
-   below. The Scope ID can be found in between `id=` and the `&chips` in the URL field.
+   below. The Scope ID can be found in between **`id=`** and the **`&chips`** in the URL field.
    
    ![Secure Workload API](/images/sw-rootscopeid.png)
 
