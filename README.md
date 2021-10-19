@@ -1181,22 +1181,22 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    This will not work correctly on Windows or Mac operating systems. The Linux machine will also need AWS CLI and the
    Kubernetes agent installed!
    
-   From the Secure Workload dashboard go to **Manage** then **Agents** on the left menu bar.
+   From the Secure Workload dashboard go to **`Manage`** > **`Agents`** on the left menu bar.
 
    ![Secure Workload Agents](/images/sw-agents.png)
 
-   Select **Installer** to go through the Software Agent Installer workflow. Click **Next**.
+   Select **`Installer`** to go through the Software Agent Installer workflow. Click **`Next`**.
 
    ![Secure Workload Installer](/images/sw-installer.png)
 
-   Select **Kubernetes** as the platform to be installed on and **YES/NO** if your Kubernetes environment is going 
-   through a proxy (add proxy info if it does). Click **Download Installer** to download the install script. Save the
+   Select **`Kubernetes`** as the platform to be installed on and **`YES/NO`** if your Kubernetes environment is going 
+   through a proxy (add proxy info if it does). Click **`Download Installer`** to download the install script. Save the
    install script to a directory on your Linux machine. 
    
    ![Secure Workload Agent Download](/images/sw-agent-download.png)
 
    Make sure that AWS CLI and Kubectl are installed on your Linux host. Also make sure your kube config file is updated
-   to use the right context (`aws eks --region <aws-region> update-kubeconfig --name <cluster-name>`).
+   to use the right context (**`aws eks --region <aws-region> update-kubeconfig --name <cluster-name>`**).
    
    ```
    [devbox Lab_Build]$ aws eks --region us-east-2 update-kubeconfig --name CNS_Lab_Test
@@ -1266,8 +1266,8 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    tetration-agent-4kbrd   1/1     Running   0          5m56s
    ```
    
-   Check the Secure Workload dashboard. Go to **Manage** then **Agents** and Select **Agent List**. The agent should be
-   there with the hostname of your EKS worker node.
+   Check the Secure Workload dashboard. Go to **`Manage`** > **`Agents`** and Select **`Agent List`**. The agent should 
+   be there with the hostname of your EKS worker node.
    
    ![Secure Workload Agent List](/images/sw-agent-installed.png)
 
@@ -1276,10 +1276,10 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    and policies for our cloud native apps Yelb and NGINX.
    
    First thing we need to do is allow the Secure Workload instance read only access to ingest the labels from the 
-   kubernetes cluster. We created a terraform file to do this for us named `secure_workload_clusterrolebinding`. To 
-   deploy these resources rename the file using the `.tf` extension, `secure_workload_clusterrolebinding.tf`. 
-   Go to the `terraform.tfvars` file and add the Secure Workload Key, Secret and URL to the variables. Make
-   sure to uncomment (`//`) variable
+   kubernetes cluster. We created a terraform file to do this for us named **`secure_workload_clusterrolebinding`**. To 
+   deploy these resources rename the file using the **`.tf`** extension, **`secure_workload_clusterrolebinding.tf`**. 
+   Go to the **`terraform.tfvars`** file and add the Secure Workload Key, Secret and URL to the variables. Make
+   sure to uncomment **(`//`)** the variables
    
    ```
    secure_workload_api_key = ""
@@ -1287,7 +1287,7 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    secure_workload_api_url = "https://<secure_workload_host>"
    ```
    
-   Go to the `variables.tf` file and uncomment the variable there as well
+   Go to the **`variables.tf`** file and uncomment the variable there as well.
    
    ```
    variable "secure_workload_api_key" {}
@@ -1296,7 +1296,7 @@ surface, minimizes lateral movement in case of security incidents, and more quic
      default = "https://<secure_workload_host>"
    ```
    
-   Run `terraform plan -out tfplan` and `terraform apply "tfplan"`
+   Run **`terraform plan -out tfplan`** and **`terraform apply "tfplan"`**.
 
    ```
    [devbox Lab_Build]$ terraform apply "tfplan"
@@ -1310,16 +1310,16 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    Apply complete! Resources: 3 added, 0 changed, 0 destroyed.
    ```
    
-   We need to get the token for the `tetration.read.only` service account. To do this we need to get the service 
-   account `secrets name` and base64 decode the output of the token. 
+   We need to get the token for the **`tetration.read.only`** service account. To do this we need to get the service 
+   account **`secrets name`** and base64 decode the output of the token. 
    * Run the command 
-   `kubectl get serviceaccount -o yaml tetration.read.only` 
+   **`kubectl get serviceaccount -o yaml tetration.read.only`**
      
       Get the name of the secret, for example in this case
-   `tetration.read.only-token-dnlqm`. 
+   **`tetration.read.only-token-dnlqm`**. 
      
    * Run the command 
-   `kubectl get secret <your secret name> --template "{{ .data.token }}" | base64 -d`. 
+   **`kubectl get secret <your secret name> --template "{{ .data.token }}" | base64 -d`**. 
      
       This will output the secret token.
 
@@ -1340,22 +1340,22 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    eyJhbGciOiJSUzI1...data omitted
    ```
    
-   Copy and save the token output. Go back to the Secure Workload dashboard. Select **Manage** and **External 
-   Orchestrators**. Select **Create New Configuration**.
+   Copy and save the token output. Go back to the Secure Workload dashboard. Select **`Manage`** and **`External 
+   Orchestrators`**. Select **`Create New Configuration`**.
    
    ![Secure Workload External Orchestrators](/images/sw-ext-orch.png)
 
-   On the **Create External Orchestrator Configuration** page select **Kubernetes** as the Type and Name it the same 
-   as your EKS Cluster name, for example `CNS_Lab_Test`.
+   On the **`Create External Orchestrator Configuration`** page select **`Kubernetes`** as the Type and Name it the same 
+   as your EKS Cluster name, for example **`CNS_Lab_Test`**.
    
    ![Secure Workload External Orchestrators](/images/sw-ext-orch-name.png)
 
-   Scroll down to `Auth Token` and paste the base64 decoded token in this field.
+   Scroll down to **`Auth Token`** and paste the base64 decoded token in this field.
 
    ![Secure Workload External Orchestrators](/images/sw-ext-orch-auth.png)
 
-   Select `Hosts List` and add the hostname of the EKS Cluster API Endpoint. You can get the hostname from the 
-   Terraform Output. You can always get the Terraform Output by doing a `terraform show`.
+   Select **`Hosts List`** and add the hostname of the EKS Cluster API Endpoint. You can get the hostname from the 
+   Terraform Output. You can always get the Terraform Output by doing a **`terraform show`**.
    
    ```
    Outputs:
@@ -1367,18 +1367,18 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    ```
 
    Copy the API server endpoint into the Hosts List of the External Orchestrator Configuration page. Make sure to
-   delete `https://` from the hostname field. Add `443` as the port number.
+   delete **`https://`** from the hostname field. Add **`443`** as the port number.
    
    ![Secure Workload External Orchestrators](/images/sw-ext-orch-host.png)
    
-   Click **Create** and the portal should successfully connect to the cluster.
+   Click **`Create`** and the portal should successfully connect to the cluster.
 
    ![Secure Workload External Orchestrators](/images/sw-ext-org-success.png)
    
-   Go back to **Manage** > **Agents** in the menu bar to the left. Select **`Agent List`** and 
+   Go back to **`Manage`** > **`Agents`** in the menu bar to the left. Select **`Agent List`** and 
    click on the EKS Worker hosts. Under the **`Labels`** section there are now labels assigned 
-   to this host. The initial label we are interested in is `✻ orchestrator_system/cluster_name`
-   which defines labels from our EKS cluster, for example in this case `CNS_Lab_Test`.
+   to this host. The initial label we are interested in is **`✻ orchestrator_system/cluster_name`**
+   which defines labels from our EKS cluster, for example in this case **`CNS_Lab_Test`**.
    
    ![Secure Workload Agent Labels](/images/sw-agent-labels.png)
 
@@ -1397,7 +1397,7 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    
    ![Secure Workload Scopes and Inventory](/images/sw-scope-pod.png)
 
-   Select the **`Services`** tab and drill into any of the `yelb` services. We are going to 
+   Select the **`Services`** tab and drill into any of the **`yelb`** services. We are going to 
    create Scopes, Inventory Filters, Workspaces (Applications), and Policies using these labels.
    Here are some labels to take note of as we will be using them in our Secure Workload Terraform
    files.
@@ -1408,7 +1408,7 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    
 4. With the Secure Workload Daemonset deployed and External Orchestrator integrated we can now use Terraform to declare
    policy as code. We first need to add the 
-   [Secure Workload Terraform Provider](https://github.com/CiscoDevNet/terraform-provider-tetration) to the `main.tf`
+   [Secure Workload Terraform Provider](https://github.com/CiscoDevNet/terraform-provider-tetration) to the **`main.tf`**
    file. Uncomment the following Secure Workload provider configuration.
    
    ```
@@ -1429,8 +1429,8 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    }
    ```
    
-   Go to the `terraform.tfvars` file and add the Secure Workload Key, Secret, URL and Root Scope ID to the variables. 
-   Make sure to uncomment if commented out (`//`).
+   Go to the **`terraform.tfvars`** file and add the Secure Workload Key, Secret, URL and Root Scope ID to the variables. 
+   Make sure to uncomment if commented out **(`//`)**.
    
    ```
    secure_workload_api_key = ""
@@ -1439,7 +1439,7 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    secure_workload_root_scope = ""
    ```
    
-   Go to the `variables.tf` file and uncomment the variable there as well.
+   Go to the **`variables.tf`** file and uncomment the variable there as well.
    
    ```
    variable "secure_workload_api_key" {}
@@ -1447,7 +1447,7 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    variable "secure_workload_api_url" {}
    variable "secure_workload_root_scope" {}
    ```
-   Run `terraform init` to initialize the provider.
+   Run **`terraform init`** to initialize the provider.
    
    ```
    [devbox Lab_Build]$ terraform init
@@ -1461,13 +1461,13 @@ surface, minimizes lateral movement in case of security incidents, and more quic
    ```
    
 5. Now that the provider is initialized, let's build out the Secure Workload policy using Terraform resources. In the
-   `Lab_Build` directory there is a file named
+   **`Lab_Build`** directory there is a file named
    [secure_workload](https://github.com/emcnicholas/Cisco_Cloud_Native_Security_Workshop/blob/main/Lab_Build/secure_workload). 
    Open the file and take a look at the code.
    
    * At the top we define our Scopes. We create a cluster scope using a query filter using the kubernetes label
-   `user_orchestrator_system/cluster_name` that is equal to the EKS Cluster name. What this will do is create a scope
-   for all inventory associated with the cluster name, for example CNS_Lab_Test.
+     **`user_orchestrator_system/cluster_name`** that is equal to the EKS Cluster name. What this will do is create a 
+     scope for all inventory associated with the cluster name, for example CNS_Lab_Test.
      
       ```
       // Cluster Scope
@@ -1479,8 +1479,9 @@ surface, minimizes lateral movement in case of security incidents, and more quic
         parent_app_scope_id = var.secure_workload_root_scope
       }
       ```
-   * Then we create a nested scope for the Yelb application which is with is using label `user_orchestrator_system/namespace`
-   which is equal to the Yelb Namespace. So all inventory with namespace named yelb will be added to this scope.
+   * Then we create a nested scope for the Yelb application which is with is using label 
+     **`user_orchestrator_system/namespace`**
+     which is equal to the Yelb Namespace. So all inventory with namespace named yelb will be added to this scope.
      
       ```
       // Yelb App Scope
@@ -1493,8 +1494,8 @@ surface, minimizes lateral movement in case of security incidents, and more quic
       }
       ```
    * After the scopes we create inventory filters for the pods and services running in the cluster. Below is just a 
-   snippet of the Yelb DB service and pod filters. As you can see they are using the labels 
-   `user_orchestrator_system/service_name` and `user_orchestrator_system/pod_name`.
+     snippet of the Yelb DB service and pod filters. As you can see they are using the labels 
+     **`user_orchestrator_system/service_name`** and **`user_orchestrator_system/pod_name`**.
    
       ```
       // Yelb App Filters
@@ -1528,7 +1529,7 @@ surface, minimizes lateral movement in case of security incidents, and more quic
       ```
      
    * Finally, we create the Yelb application and policies, which we assign to the Yelb Scope. Here is snippet of the
-   application, and the first policy rule.
+     application, and the first policy rule.
    
       ```
       resource "tetration_application" "yelb_app" {
@@ -1550,14 +1551,14 @@ surface, minimizes lateral movement in case of security incidents, and more quic
       ...data omitted
       ```
    
-   Change the name of file `secure_workload` to `secure_workload.tf` and run `terraform plan -out tfplan` and 
-   `terraform apply "tfplan"` to deploy the resources.
+   Change the name of file **`secure_workload`** to **`secure_workload.tf`** and run **`terraform plan -out tfplan`** 
+   and **`terraform apply "tfplan"`** to deploy the resources.
    
    Verify the resources by going back into the Secure Workload dashboard. From the menu go to **`Organize`** > 
    **`Scopes and Inventory`**. You will now see 2 nested scopes under the root scope, for example in this case the 
-   cluster scope is named `CNS_Lab_Test` and the app scope is named `Yelb`. Under the `Yelb` scope you will see all 
-   the inventory filters. If you click on each inventory filter it will show what resources (pods or services) are 
-   assigned. 
+   cluster scope is named **`CNS_Lab_Test`** and the app scope is named **`Yelb`**. Under the **`Yelb`** scope you will 
+   see all the inventory filters. If you click on each inventory filter it will show what resources (pods or services) 
+   are assigned. 
    
    ![Secure Workload Scopes](/images/sw-scopes-deployed.png)
 
