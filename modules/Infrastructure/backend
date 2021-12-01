@@ -1,0 +1,11 @@
+terraform {
+  backend "remote" {
+    hostname = "app.terraform.io"
+    token = ""
+    organization = ""
+
+    workspaces {
+      name = ""
+    }
+  }
+}
