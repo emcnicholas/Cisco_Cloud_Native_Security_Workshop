@@ -2,5 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/Applications/Cisco_Cloud_Native_Security_Applications" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/Infrastructure/Cisco_Cloud_Native_Security_Infrastructure" vcs="Git" />
   </component>
 </project>

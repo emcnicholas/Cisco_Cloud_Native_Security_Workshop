@@ -71,7 +71,7 @@ provider "tetration" {
 }
 
 module "Applications" {
-  source = "github.com/emcnicholas/Cisco_Cloud_Native_Security_Applications"
+  source = "../../modules/Applications"
   aws_access_key             = var.aws_access_key
   aws_secret_key             = var.aws_secret_key
   region                     = var.region
